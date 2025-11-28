@@ -1196,54 +1196,93 @@ function generateCaption(type, location, price, area, bedrooms, bathrooms) {
     return parts.join('\n');
 }
 
+// 把图片上传到 Firebase Storage，返回每张图片的 URL 数组
+async function uploadImagesToStorage(files, listingId) {
+    const { storage, ref, uploadBytes, getDownloadURL } = window._storage;
+    const urls = [];
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        // 每张图片在 Storage 里的路径：listings/{listingId}/{时间戳_原文件名}
+        const path = `listings/${listingId}/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, path);
+
+        // 上传文件
+        await uploadBytes(storageRef, file);
+        // 获取可访问的下载链接
+        const url = await getDownloadURL(storageRef);
+        urls.push(url);
+    }
+
+    return urls;
+}
 
         // ==================== 上传房源 ====================
 document.getElementById('uploadForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    if (uploadedImages.length === 0) {
+    if (uploadedFiles.length === 0) { // 这里用 uploadedFiles
         alert('请至少上传一张图片');
         return;
     }
 
-const newListing = {
-    user: currentUser,
-    type: document.getElementById('propertyType').value,
-    location: document.getElementById('location').value,
-    price: parseInt(document.getElementById('price').value),
-    area: parseInt(document.getElementById('area').value),
-    bedrooms: parseInt(document.getElementById('bedrooms').value),
-    bathrooms: parseInt(document.getElementById('bathrooms').value),
+    const baseData = {
+        user: currentUser,
+        type: document.getElementById('propertyType').value,
+        location: document.getElementById('location').value,
+        price: parseInt(document.getElementById('price').value),
+        area: parseInt(document.getElementById('area').value),
+        bedrooms: parseInt(document.getElementById('bedrooms').value),
+        bathrooms: parseInt(document.getElementById('bathrooms').value),
 
-    // 新增字段
-    floor: document.getElementById('floor').value,
-    carpark: document.getElementById('carpark').value,
-    direction: document.getElementById('direction').value,
-    furnished: document.getElementById('furnished').value,
-    securityDeposit: document.getElementById('securityDeposit').value,
-    utilitiesDeposit: document.getElementById('utilitiesDeposit').value,
-    otherDeposit: document.getElementById('otherDeposit').value,
-    remarks: document.getElementById('remarks').value,
-    agentName: document.getElementById('agentName').value,
-    address: document.getElementById('address').value,
+        // 你新增的字段
+        floor: document.getElementById('floor').value,
+        carpark: document.getElementById('carpark').value,
+        direction: document.getElementById('direction').value,
+        furnished: document.getElementById('furnished').value,
+        securityDeposit: document.getElementById('securityDeposit').value,
+        utilitiesDeposit: document.getElementById('utilitiesDeposit').value,
+        otherDeposit: document.getElementById('otherDeposit').value,
+        remarks: document.getElementById('remarks').value,
+        agentName: document.getElementById('agentName').value,
+        address: document.getElementById('address').value,
 
-    images: uploadedImages,
-    caption: document.getElementById('generatedCaption').textContent,
-    date: new Date().toISOString()
-};
+        // Nearby
+        nearby1: document.getElementById('nearby1')?.value || '',
+        nearby2: document.getElementById('nearby2')?.value || '',
+        nearby3: document.getElementById('nearby3')?.value || '',
+        nearby4: document.getElementById('nearby4')?.value || '',
 
+        caption: document.getElementById('generatedCaption').textContent,
+        date: new Date().toISOString()
+    };
 
     try {
-        const { db, collection, addDoc } = window._firestore;
-        await addDoc(collection(db, "listings"), newListing);
+        const { db, collection, doc, setDoc } = window._firestore;
 
-        alert('房源发布成功！（已存到云端）');
+        // 1) 先生成一个文档 ID（不带 images），方便用来当 Storage 路径
+        const listingsCol = collection(db, "listings");
+        const newDocRef = doc(listingsCol); // 自动生成 id
 
+        // 2) 先写入基本数据（暂时不含 images）
+        await setDoc(newDocRef, { ...baseData, images: [] });
+
+        // 3) 把图片上传到 Storage，拿到 URL 数组
+        const imageUrls = await uploadImagesToStorage(uploadedFiles, newDocRef.id);
+
+        // 4) 再用 images URL 覆盖更新这条房源
+        await setDoc(newDocRef, { ...baseData, images: imageUrls }, { merge: true });
+
+        alert('房源发布成功！（图片已上传到云端）');
+
+        // 5) 重置表单和本地状态
         document.getElementById('uploadForm').reset();
         uploadedImages = [];
+        uploadedFiles = [];
         document.getElementById('imagePreview').innerHTML = '';
         document.getElementById('generatedCaption').innerHTML = '';
 
+        // 6) 重新拉取 Firestore 数据，刷新界面
         await loadListingsFromFirestore();
         updateDashboard();
         refreshListings();
@@ -1253,7 +1292,6 @@ const newListing = {
         alert('房源发布失败，请稍后再试');
     }
 });
-
 
         // ==================== 房源展示 ====================
         function refreshListings() {
