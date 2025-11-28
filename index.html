@@ -785,6 +785,34 @@
 
 <div class="form-row full">
     <div class="form-group">
+        <label>Nearby Access 1</label>
+        <input type="text" id="nearby1" placeholder="500m to 99 Speed Mart">
+    </div>
+</div>
+
+<div class="form-row full">
+    <div class="form-group">
+        <label>Nearby Access 2</label>
+        <input type="text" id="nearby2" placeholder="1.0km to Dataran Pahlawan">
+    </div>
+</div>
+
+<div class="form-row full">
+    <div class="form-group">
+        <label>Nearby Access 3</label>
+        <input type="text" id="nearby3" placeholder="15min to Jonker Streets">
+    </div>
+</div>
+
+<div class="form-row full">
+    <div class="form-group">
+        <label>Nearby Access 4</label>
+        <input type="text" id="nearby4" placeholder="20min to Taman Malim Jaya">
+    </div>
+</div>
+
+<div class="form-row full">
+    <div class="form-group">
         <label>Remarks</label>
         <textarea id="remarks" placeholder="Race, No Indian, =Electric n Water Supply Cutted Off"></textarea>
     </div>
@@ -803,6 +831,7 @@
         <textarea id="address" placeholder="No 6-1, Jalan Rahmat 4, Taman Malim Jaya"></textarea>
     </div>
 </div>
+                        
 
                         <div class="form-row full">
                             <div class="form-group">
@@ -1087,29 +1116,73 @@ async function loadListingsFromFirestore() {
             document.getElementById('generatedCaption').innerHTML = `<div class="generated-caption">${caption}</div>`;
         });
 
-        function generateCaption(type, location, price, area, bedrooms, bathrooms, features) {
-            const featureList = features ? features.split(',').map(f => f.trim()).filter(f => f) : [];
-            const featureText = featureList.length > 0 ? featureList.map((f, i) => `${String.fromCharCode(10003)} ${f}`).join('\n') : '';
+function generateCaption(type, location, price, area, bedrooms, bathrooms, features) {
+    // 读取你表单里的更多字段
+    const furnished = document.getElementById('furnished')?.value || '';          // Fully / Partially / No
+    const floor = document.getElementById('floor')?.value || '';
+    const carpark = document.getElementById('carpark')?.value || '';
+    const direction = document.getElementById('direction')?.value || '';
+    const agentName = document.getElementById('agentName')?.value || '';
 
-            let caption = `【推荐房源】${location}精选${type}\n\n`;
-            caption += `💰 价格：RM ${parseInt(price).toLocaleString()}\n`;
-            caption += `📐 面积：${area} 平方尺\n`;
 
-            if (bedrooms > 0 || bathrooms > 0) {
-                caption += `🏠 房间：${bedrooms}房${bathrooms}厕\n`;
-            }
+    // Nearby 手动输入（你可以之后在表单里加 4 个 input）
+    const nearby1 = document.getElementById('nearby1')?.value || '';
+    const nearby2 = document.getElementById('nearby2')?.value || '';
+    const nearby3 = document.getElementById('nearby3')?.value || '';
+    const nearby4 = document.getElementById('nearby4')?.value || '';
 
-            if (featureText) {
-                caption += `✨ 特色：\n${featureText}\n`;
-            }
+    // 价格格式
+    const priceText = parseInt(price).toLocaleString();
 
-            caption += `\n━━━━━━━━━━━━━━━━━\n`;
-            caption += `✅ 现在报价，优惠多多！\n`;
-            caption += `📞 欢迎看房，诚心者联系！\n`;
-            caption += `⏰ 房源发布：${new Date().toLocaleDateString('zh-CN')}`;
+    // 标题：优先 Furnished + 地区 + 房型
+    const furnishedTitle = furnished ? furnished : 'Rental';
+    const title = `[${furnishedTitle}] ${location} – ${type} For Rent RM${priceText}`;
 
-            return caption;
-        }
+    // House Details
+    let detailsLines = [];
+    if (bedrooms) detailsLines.push(`• ${bedrooms} Bedrooms`);
+    if (bathrooms) detailsLines.push(`• ${bathrooms} Bathrooms`);
+    if (area) detailsLines.push(`• Size ${area} sq.ft`);
+    if (furnished) detailsLines.push(`• ${furnished} Furnished`);
+    if (floor) detailsLines.push(`• Floor: ${floor}`);
+    if (carpark) detailsLines.push(`• Car Park: ${carpark}`);
+    if (direction) detailsLines.push(`• Direction: ${direction}`);
+    
+
+    const detailsBlock = detailsLines.length
+        ? `House Details:\n${detailsLines.join('\n')}`
+        : '';
+
+    // Nearby Access
+    let nearbyLines = [];
+    if (nearby1) nearbyLines.push(`• ${nearby1}`);
+    if (nearby2) nearbyLines.push(`• ${nearby2}`);
+    if (nearby3) nearbyLines.push(`• ${nearby3}`);
+    if (nearby4) nearbyLines.push(`• ${nearby4}`);
+
+    const nearbyBlock = nearbyLines.length
+        ? `Nearby Access:\n${nearbyLines.join('\n')}`
+        : '';
+
+// 联系方式
+    const contactLine = agentName
+        ? `Interested, please contact ${agentName}.`
+        : `Interested, please contact for more details.`;
+
+    // 拼接最终文案
+    const parts = [
+        title,
+        '',
+        detailsBlock,
+        '',
+        nearbyBlock,
+        '',
+        contactLine
+    ].filter(Boolean); // 去掉空块
+
+    return parts.join('\n');
+}
+
 
         // ==================== 上传房源 ====================
 document.getElementById('uploadForm').addEventListener('submit', async function(e) {
