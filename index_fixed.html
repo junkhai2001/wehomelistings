@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房源共享平台 - 内部管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #e74c3c;
+            --light-bg: #ecf0f1;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        .login-box {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            border: 2px solid var(--secondary-color);
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 12px;
+            display: inline-block;
+            width: auto;
+        }
+
+        .btn-danger {
+            background-color: var(--warning-color);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .main-container {
+            display: none;
+            flex-direction: row;
+        }
+
+        .main-container.active {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            min-height: 100vh;
+            padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+            font-size: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 5px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 30px;
+            flex: 1;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: var(--primary-color);
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+            color: var(--text-light);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-size: 22px;
+            border-bottom: 2px solid var(--light-bg);
+            padding-bottom: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .image-upload {
+            border: 2px dashed var(--secondary-color);
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            background-color: var(--light-bg);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .image-upload input {
+            display: none;
+        }
+
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: var(--warning-color);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .image-item:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .listing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .listing-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .listing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .listing-card-image {
+            width: 100%;
+            height: 200px;
+            background-color: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 12px;
+            overflow: hidden;
+        }
+
+        .listing-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .listing-card-content {
+            padding: 15px;
+        }
+
+        .listing-card-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .listing-card-price {
+            font-size: 18px;
+            color: var(--success-color);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .listing-card-info {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .listing-card-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-close:hover {
+            color: var(--text-dark);
+        }
+
+        .listing-detail-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .generated-caption {
+            background-color: var(--light-bg);
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid var(--secondary-color);
+            margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 32px;
+            margin: 0;
+        }
+
+        .stat-card p {
+            font-size: 12px;
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .demo-credentials {
+            background-color: var(--light-bg);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .demo-credentials p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: static;
+                min-height: auto;
+            }
+            .content {
+                margin-left: 0;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .listing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764346975285&amp;type=content-script&amp;dmn=ppl-ai-code-interpreter-files.s3.amazonaws.com&amp;url=https%3A%2F%2Fppl-ai-code-interpreter-files.s3.amazonaws.com%2Fweb%2Fdirect-files%2F570057e7b393865b2e4de6d99b8b20c9%2F5f0d8a6d-54ce-4661-b2ef-61877941f1e6%2F94012b36.html%3Fresponse-content-disposition%3Dattachment%253B%2520filename%253Dindex_fixed.html%253B%2520filename%252A%253DUTF-8%2527%2527index_fixed.html%26AWSAccessKeyId%3DASIA2F3EMEYEQES7ENEB%26Signature%3DBwVd0sPwY5wL16F68jjgUnaWvL0%253D%26x-amz-security-token%3DIQoJb3JpZ2luX2VjEPH%252F%252F%252F%252F%252F%252F%252F%252F%252F%252FwEaCXVzLWVhc3QtMSJHMEUCIQDC7k420b9uOyglbBjDcjwfjYmwpRQFgiZBMkMdAPif8gIgJ6DhdHBpAlt3k3p6Fk2anQ4hOx%252Fj3E5bmIzTtwVXJrkq%252FAQIuv%252F%252F%252F%252F%252F%252F%252F%252F%252F%252FARABGgw2OTk3NTMzMDk3MDUiDBgg2UtXc3B0AajwGSrQBJ1P9s0XPswFUyg8FfkACyvcaVoIan09OmwpSr2MBtbjcVBeIyCFCklA0tI4AqP92HnQCM7WtlP0nbo22tjgSX1jXAXrRdQjdZMJ5qZ7I%252FN0q4CKnf5iLFrX%252FgmLVBP%252Bta%252BlcABiYh%252FGDoahw2Yqay6JFo7ymCKSX4vO9R99WIgkdqd2u%252By9QmeRzwSj1HdpwIurei%252BwCw7k9uBnytwHKYobSjkwuX9oO%252F93WivR%252BvCBF9HhXCdXEHbGvKuq61y7npa8HBa1XAGyKpMymEBo88IurwEJTd0o8Oomn4Q730PrmeW7JeP8MH38pbZzvDVYsWkdnt7e84SfDV6oIDhSdanlkMiAkhhRfDDen3sRT5OEaM2eRATyuc18HpWyJhlpS3777v%252BHNiERmmWgYlkXrVbr3SFKKqjJ8Pm339RbqMAtIjNc40yhuIbe%252B9zX7B%252FksqWX%252FP5MQejxZF4%252B9R0A8DlSIxV8%252FnLahMddHyZ5ZedT%252F8SRG2qluIFQGrB5ztooyntqKEDhbZ7C1vcaGoWMY8vHCaYBCi%252BnRcS1vxgBo4l4GJBAvj7gaeGlqOm4LNri%252FdWOHj3mmJS55PmZseOYCU38i9Rl8Nv5BUhmC7LvquAXJckRuRi77JLyxiIWRFYFM%252FkQmfgXnb9KQ5iWtUswgkF2W7DXhK%252B%252BQpCAkQRQ97OKbHF4TvfmftLaLzmFGwSwku8sibCQkSHnAXwa51K9pV9O8qgqMFCxrT8C3B4q%252BszXw%252F90Hr2wSuBRY%252BXEZ2cjjZ2xBIuDqwcAvS2ZZc7epG4w%252F5mnyQY6mAErBzbMFe6Rso%252FaVDF1dDuEX6QHnqpZ%252BL2V8RBMDmveXlsjIsgsfwvbKjywqPMF70N1%252BdzJ7OlPV%252FXTYEs6LW%252FLVTKnOjlilT1aMNYb6xxwtMhlClfk0%252BFCrrPMVcq92BuoQSaImyja0ykVhEuem7f2WXcYW7RoAvSmOQZNgH1eOEydfYZAFyN3nR05PDUq80ykKbaxneQKkg%253D%253D%26Expires%3D1764349700&amp;app=comet.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-dnt"></script><script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764346975285&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script><script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { 
+            getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc 
+        } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { 
+            getStorage, ref, uploadBytes, getDownloadURL 
+        } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeVd0dSa1c7Pe7GrkbLQhv_t1SiY7msyU",
+            authDomain: "wehome-listings.firebaseapp.com",
+            projectId: "wehome-listings",
+            storageBucket: "wehome-listings.firebasestorage.app",
+            messagingSenderId: "803741960436",
+            appId: "1:803741960436:web:c4bf134af50d59c80676a1",
+            measurementId: "G-TL44X75XBG"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        window._firestore = { db, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc };
+        window._storage = { storage, ref, uploadBytes, getDownloadURL };
+    </script>
+</head>
+
+<body>
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <h1>🏠 房源共享平台</h1>
+            <div class="demo-credentials">
+                <p><strong>演示账号：</strong></p>
+                <p>用户名：gohjunkhai</p>
+                <p>密码：123456</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="password" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="btn btn-primary">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="mainApp" class="main-container">
+        <div class="sidebar">
+            <h2>菜单</h2>
+            <ul>
+                <li><a class="menu-link active" data-section="dashboard">📊 仪表板</a></li>
+                <li><a class="menu-link" data-section="upload">📤 上传房源</a></li>
+                <li><a class="menu-link" data-section="listings">📋 房源库</a></li>
+                <li><a class="menu-link" data-section="my-listings">✨ 我的房源</a></li>
+                <li><a class="menu-link" data-section="export">💾 导出数据</a></li>
+                <li><a class="menu-link" data-section="settings">⚙️ 设置</a></li>
+                <li><a id="logoutBtn">🚪 登出</a></li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <div class="header">
+                <h1>房源共享平台</h1>
+                <div class="user-info">
+                    <p>欢迎，<strong id="currentUser"></strong></p>
+                    <p id="currentTime"></p>
+                </div>
+            </div>
+
+            <div id="dashboard" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalListings">0</h3>
+                        <p>总房源数</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="myListings">0</h3>
+                        <p>我的房源</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="teamMembers">0</h3>
+                        <p>团队成员</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="thisMonth">0</h3>
+                        <p>本月新增</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>最近上传的房源</h2>
+                    <div id="recentListings" class="listing-grid"></div>
+                </div>
+            </div>
+
+            <div id="upload" class="section">
+                <div class="card">
+                    <h2>上传新房源</h2>
+                    <form id="uploadForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>房产类型 *</label>
+                                <select id="propertyType" required>
+                                    <option value="">-- 选择房产类型 --</option>
+                                    <option value="公寓">公寓 (Apartment)</option>
+                                    <option value="别墅">别墅 (Bungalow)</option>
+                                    <option value="排屋">排屋 (Terrace)</option>
+                                    <option value="半独立">半独立 (Semi-D)</option>
+                                    <option value="店面">店面 (Shop Lot)</option>
+                                    <option value="办公">办公室 (Office)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>位置 @ 区域 *</label>
+                                <input type="text" id="location" placeholder="例：The Wave Residence @ Kota Laksamana" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>价格 (RM) *</label>
+                                <input type="text" id="price" placeholder="例：1000" required>
+                            </div>
+                            <div class="form-group">
+                                <label>面积 (sq.ft) *</label>
+                                <input type="text" id="area" placeholder="例：22x70 or 1540" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>房间</label>
+                                <input type="number" id="bedrooms" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>浴室</label>
+                                <input type="number" id="bathrooms" value="0">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>楼层</label>
+                                <input type="text" id="floor" placeholder="Floor, Example GF 1F 2F">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>停车位</label>
+                                <input type="text" id="carpark" placeholder="0, 1, 2 or Open">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>朝向</label>
+                                <input type="text" id="direction" placeholder="North, West, Southeast">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>家私 Furnished</label>
+                                <input type="text" id="furnished" placeholder="Fully, Partially or No">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Security Deposit</label>
+                                <input type="text" id="securityDeposit" placeholder="1 or 2">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Utilities Deposit</label>
+                                <input type="text" id="utilitiesDeposit" placeholder="0.5, 1 or Own Apply">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Other Deposit</label>
+                                <input type="text" id="otherDeposit" placeholder="Renovation Deposit">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Nearby 1</label>
+                                <input type="text" id="nearby1" placeholder="500m to 99 Speed Mart">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Nearby 2</label>
+                                <input type="text" id="nearby2" placeholder="1.0km to Dataran">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Nearby 3</label>
+                                <input type="text" id="nearby3" placeholder="15min to Jonker">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Nearby 4</label>
+                                <input type="text" id="nearby4" placeholder="20min to Taman">
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>备注</label>
+                                <textarea id="remarks" placeholder="Race, No Indian..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Agent Name</label>
+                                <textarea id="agentName" placeholder="Jun Khai"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>地址</label>
+                                <textarea id="address" placeholder="No 6-1, Jalan Rahmat"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>上传照片 (最多10张) *</label>
+                                <div class="image-upload" id="imageUpload">
+                                    <p>点击或拖拽图片到这里上传</p>
+                                    <input type="file" id="imageInput" multiple accept="image/*">
+                                </div>
+                                <div class="image-preview" id="imagePreview"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>自动生成的房源文案</label>
+                                <button type="button" class="btn btn-secondary btn-small" id="generateCaption">生成文案</button>
+                                <button type="button" class="btn btn-secondary btn-small" id="copyCaption">复制文案</button>
+                                <div id="generatedCaption"></div>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button type="submit" class="btn btn-primary">✅ 发布房源</button>
+                            <button type="reset" class="btn btn-secondary">🔄 清空表单</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="listings" class="section">
+                <div class="card">
+                    <h2>所有房源库</h2>
+                    <div class="search-box">
+                        <input type="text" id="searchListings" placeholder="搜索位置、类型或价格...">
+                    </div>
+                    <div id="listingsContainer" class="listing-grid"></div>
+                </div>
+            </div>
+
+            <div id="my-listings" class="section">
+                <div class="card">
+                    <h2>我的房源</h2>
+                    <div id="myListingsContainer" class="listing-grid"></div>
+                </div>
+            </div>
+
+            <div id="export" class="section">
+                <div class="card">
+                    <h2>导出数据</h2>
+                    <p>选择要导出的格式：</p>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button class="btn btn-primary" id="exportJSON">📥 导出为 JSON</button>
+                        <button class="btn btn-primary" id="exportCSV">📥 导出为 CSV</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings" class="section">
+                <div class="card">
+                    <h2>账户设置</h2>
+                    <div class="form-group">
+                        <label>当前用户名</label>
+                        <input type="text" id="settingsUsername" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="listingModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">×</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let users = {
+            admin: { password: '123456', role: 'admin' },
+            looannshen: { password: '123456', role: 'agent' },
+            tanchunkiat: { password: '123456', role: 'agent' },
+            wongmingli: { password: '123456', role: 'agent' },
+            gohjunkhai: { password: '123456', role: 'agent' }
+        };
+
+        let listings = [];
+        let currentUser = null;
+        let uploadedImages = [];
+        let uploadedFiles = [];
+
+        // 从 Firestore 拉取房源
+        async function loadListingsFromFirestore() {
+            const { db, collection, getDocs, query, orderBy } = window._firestore;
+            const q = query(collection(db, "listings"), orderBy("date", "desc"));
+            const snap = await getDocs(q);
+            listings = [];
+            snap.forEach(docSnap => {
+                listings.push({
+                    id: docSnap.id,
+                    ...docSnap.data()
+                });
+            });
+        }
+
+        // 登录
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (users[username] && users[username].password === password) {
+                currentUser = username;
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainApp').classList.add('active');
+                document.getElementById('currentUser').textContent = username;
+                document.getElementById('settingsUsername').value = username;
+                
+                await loadListingsFromFirestore();
+                updateDashboard();
+                refreshListings();
+                refreshMyListings();
+                startClock();
+            } else {
+                alert('用户名或密码错误！');
+            }
+        });
+
+        // 登出
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if (confirm('确定要登出吗？')) {
+                currentUser = null;
+                document.getElementById('mainApp').classList.remove('active');
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('loginForm').reset();
+            }
+        });
+
+        // 菜单导航
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const section = this.dataset.section;
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+                document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                if (section === 'listings') refreshListings();
+                if (section === 'my-listings') refreshMyListings();
+            });
+        });
+
+        // 时钟
+        function startClock() {
+            function updateTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+        }
+
+        // 图片上传处理
+        document.getElementById('imageUpload').addEventListener('click', function() {
+            document.getElementById('imageInput').click();
+        });
+
+        document.getElementById('imageUpload').addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = 'rgba(52, 152, 219, 0.1)';
+        });
+
+        document.getElementById('imageUpload').addEventListener('dragleave', function() {
+            this.style.backgroundColor = '';
+        });
+
+        document.getElementById('imageUpload').addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = '';
+            handleImages(e.dataTransfer.files);
+        });
+
+        document.getElementById('imageInput').addEventListener('change', function() {
+            handleImages(this.files);
+        });
+
+        function handleImages(files) {
+            if (uploadedImages.length + files.length > 10) {
+                alert('最多只能上传10张图片');
+                return;
+            }
+
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    uploadedFiles.push(file);
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImages.push(e.target.result);
+                        displayImagePreviews();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        function displayImagePreviews() {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            uploadedImages.forEach((img, index) => {
+                const item = document.createElement('div');
+                item.className = 'image-item';
+                item.innerHTML = `
+                    <img src="${img}" alt="preview">
+                    <button class="remove-btn" type="button" data-index="${index}">×</button>
+                `;
+                preview.appendChild(item);
+            });
+
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    uploadedImages.splice(index, 1);
+                    uploadedFiles.splice(index, 1);
+                    displayImagePreviews();
+                });
+            });
+        }
+
+        // 文案生成
+        document.getElementById('generateCaption').addEventListener('click', function(e) {
+            e.preventDefault();
+            const type = document.getElementById('propertyType').value;
+            const location = document.getElementById('location').value;
+            const price = document.getElementById('price').value;
+            const area = document.getElementById('area').value;
+            const bedrooms = document.getElementById('bedrooms').value;
+            const bathrooms = document.getElementById('bathrooms').value;
+
+            if (!type || !location || !price || !area) {
+                alert('请先填写房产类型、位置、价格和面积');
+                return;
+            }
+
+            const caption = generateCaption(type, location, price, area, bedrooms, bathrooms);
+            document.getElementById('generatedCaption').innerHTML = `<div class="generated-caption">${caption}</div>`;
+        });
+
+        function generateCaption(type, location, price, area, bedrooms, bathrooms) {
+            const furnished = document.getElementById('furnished').value || '';
+            const floor = document.getElementById('floor').value || '';
+            const carpark = document.getElementById('carpark').value || '';
+            const direction = document.getElementById('direction').value || '';
+            const agentName = document.getElementById('agentName').value || '';
+            const nearby1 = document.getElementById('nearby1').value || '';
+            const nearby2 = document.getElementById('nearby2').value || '';
+            const nearby3 = document.getElementById('nearby3').value || '';
+            const nearby4 = document.getElementById('nearby4').value || '';
+
+            const priceText = parseInt(price).toLocaleString();
+            const furnishedTitle = furnished ? furnished : 'Rental';
+            const title = `[${furnishedTitle}] ${location} – ${type} For Rent RM${priceText}`;
+
+            let detailsLines = [];
+            if (bedrooms) detailsLines.push(`• ${bedrooms} Bedrooms`);
+            if (bathrooms) detailsLines.push(`• ${bathrooms} Bathrooms`);
+            if (area) detailsLines.push(`• Size ${area} sq.ft`);
+            if (furnished) detailsLines.push(`• ${furnished} Furnished`);
+            if (floor) detailsLines.push(`• Floor: ${floor}`);
+            if (carpark) detailsLines.push(`• Car Park: ${carpark}`);
+            if (direction) detailsLines.push(`• Direction: ${direction}`);
+
+            const detailsBlock = detailsLines.length ? `House Details:\n${detailsLines.join('\n')}` : '';
+
+            let nearbyLines = [];
+            if (nearby1) nearbyLines.push(`• ${nearby1}`);
+            if (nearby2) nearbyLines.push(`• ${nearby2}`);
+            if (nearby3) nearbyLines.push(`• ${nearby3}`);
+            if (nearby4) nearbyLines.push(`• ${nearby4}`);
+
+            const nearbyBlock = nearbyLines.length ? `Nearby Access:\n${nearbyLines.join('\n')}` : '';
+            const contactLine = agentName ? `Interested, please contact ${agentName}.` : 'Interested, please contact for more details.';
+
+            return [title, '', detailsBlock, '', nearbyBlock, '', contactLine].filter(Boolean).join('\n');
+        }
+
+        // 复制文案
+        document.getElementById('copyCaption').addEventListener('click', async function() {
+            const text = document.getElementById('generatedCaption').innerText.trim();
+            if (!text) {
+                alert('没有可以复制的文案');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(text);
+                alert('文案已复制');
+            } catch (err) {
+                alert('复制失败，请手动选中文案复制');
+            }
+        });
+
+        // 上传表单提交
+        async function uploadImagesToStorage(files, listingId) {
+            const { storage, ref, uploadBytes, getDownloadURL } = window._storage;
+            const urls = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const path = `listings/${listingId}/${Date.now()}_${file.name}`;
+                const storageRef = ref(storage, path);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                urls.push(url);
+            }
+            return urls;
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (uploadedFiles.length === 0) {
+                alert('请至少上传一张图片');
+                return;
+            }
+
+            const baseData = {
+                user: currentUser,
+                type: document.getElementById('propertyType').value,
+                location: document.getElementById('location').value,
+                price: parseInt(document.getElementById('price').value),
+                area: document.getElementById('area').value,
+                bedrooms: parseInt(document.getElementById('bedrooms').value),
+                bathrooms: parseInt(document.getElementById('bathrooms').value),
+                floor: document.getElementById('floor').value,
+                carpark: document.getElementById('carpark').value,
+                direction: document.getElementById('direction').value,
+                furnished: document.getElementById('furnished').value,
+                securityDeposit: document.getElementById('securityDeposit').value,
+                utilitiesDeposit: document.getElementById('utilitiesDeposit').value,
+                otherDeposit: document.getElementById('otherDeposit').value,
+                remarks: document.getElementById('remarks').value,
+                agentName: document.getElementById('agentName').value,
+                address: document.getElementById('address').value,
+                nearby1: document.getElementById('nearby1').value,
+                nearby2: document.getElementById('nearby2').value,
+                nearby3: document.getElementById('nearby3').value,
+                nearby4: document.getElementById('nearby4').value,
+                caption: document.getElementById('generatedCaption').textContent,
+                date: new Date().toISOString()
+            };
+
+            try {
+                const { db, collection, doc, setDoc } = window._firestore;
+                const listingsCol = collection(db, "listings");
+                const newDocRef = doc(listingsCol);
+
+                await setDoc(newDocRef, { ...baseData, images: [] });
+                const imageUrls = await uploadImagesToStorage(uploadedFiles, newDocRef.id);
+                await setDoc(newDocRef, { ...baseData, images: imageUrls }, { merge: true });
+
+                alert('房源发布成功！');
+                document.getElementById('uploadForm').reset();
+                uploadedImages = [];
+                uploadedFiles = [];
+                document.getElementById('imagePreview').innerHTML = '';
+                document.getElementById('generatedCaption').innerHTML = '';
+
+                await loadListingsFromFirestore();
+                updateDashboard();
+                refreshListings();
+                refreshMyListings();
+            } catch (err) {
+                console.error(err);
+                alert('房源发布失败，请稍后再试');
+            }
+        });
+
+        // 仪表板
+        function updateDashboard() {
+            document.getElementById('totalListings').textContent = listings.length;
+            document.getElementById('myListings').textContent = listings.filter(l => l.user === currentUser).length;
+            const uniqueUsers = new Set(listings.map(l => l.user)).size;
+            document.getElementById('teamMembers').textContent = uniqueUsers;
+            const thisMonth = listings.filter(l => new Date(l.date).getMonth() === new Date().getMonth()).length;
+            document.getElementById('thisMonth').textContent = thisMonth;
+
+            const recentContainer = document.getElementById('recentListings');
+            recentContainer.innerHTML = '';
+            listings.slice(0, 6).forEach(listing => {
+                const card = createListingCard(listing);
+                recentContainer.appendChild(card);
+            });
+        }
+
+        function createListingCard(listing) {
+            const card = document.createElement('div');
+            card.className = 'listing-card';
+            card.dataset.listingId = listing.id;
+            card.innerHTML = `
+                <div class="listing-card-image">
+                    ${listing.images && listing.images[0] ? `<img src="${listing.images[0]}" alt="${listing.type}">` : '<span>暂无图片</span>'}
+                </div>
+                <div class="listing-card-content">
+                    <div class="listing-card-title">${listing.type} - ${listing.location}</div>
+                    <div class="listing-card-price">RM ${listing.price.toLocaleString()}</div>
+                    <div class="listing-card-info">
+                        <p>${listing.bedrooms}房 ${listing.bathrooms}厕 | ${listing.area} sq.ft</p>
+                        <p>发布者：${listing.user}</p>
+                    </div>
+                    <div class="listing-card-actions">
+                        <button class="btn btn-small btn-primary view-btn">查看详情</button>
+                        ${listing.user === currentUser ? `<button class="btn btn-small btn-danger delete-btn">删除</button>` : ''}
+                    </div>
+                </div>
+            `;
+
+            card.querySelector('.view-btn').addEventListener('click', () => viewListing(listing.id));
+            if (listing.user === currentUser) {
+                card.querySelector('.delete-btn').addEventListener('click', () => deleteListing(listing.id));
+            }
+
+            return card;
+        }
+
+        function viewListing(id) {
+            const listing = listings.find(l => l.id === id);
+            if (!listing) return;
+
+            const modal = document.getElementById('listingModal');
+            const modalContent = document.getElementById('modalContent');
+
+            let galleryHTML = '';
+            if (listing.images && listing.images.length > 0) {
+                galleryHTML = `
+                    <img src="${listing.images[0]}" class="listing-detail-image" id="mainImage" alt="${listing.type}">
+                `;
+            }
+
+            modalContent.innerHTML = `
+                <h2>${listing.type} - ${listing.location}</h2>
+                ${galleryHTML}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <p><strong style="color: #27ae60; font-size: 18px;">RM ${listing.price.toLocaleString()}</strong></p>
+                        <p><strong>面积：</strong> ${listing.area} sq.ft</p>
+                        <p><strong>房间：</strong> ${listing.bedrooms} 房 ${listing.bathrooms} 厕</p>
+                    </div>
+                    <div>
+                        <p><strong>发布者：</strong> ${listing.user}</p>
+                        <p><strong>发布时间：</strong> ${new Date(listing.date).toLocaleDateString('zh-CN')}</p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3>详细资料</h3>
+                    <p><strong>楼层：</strong> ${listing.floor || '-'}</p>
+                    <p><strong>停车位：</strong> ${listing.carpark || '-'}</p>
+                    <p><strong>朝向：</strong> ${listing.direction || '-'}</p>
+                    <p><strong>家私：</strong> ${listing.furnished || '-'}</p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3>房源文案</h3>
+                    <div class="generated-caption">${(listing.caption || '暂无文案').replace(/\n/g, '<br>')}</div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary btn-small copy-caption-btn">📋 复制文案</button>
+                    <button class="btn btn-secondary btn-small download-images-btn">📥 下载所有图片</button>
+                    <button class="btn btn-secondary btn-small close-modal-btn">关闭</button>
+                </div>
+            `;
+
+            modalContent.querySelector('.copy-caption-btn').addEventListener('click', () => copyListingCaption(listing.id));
+            modalContent.querySelector('.download-images-btn').addEventListener('click', () => downloadImages(listing.id));
+            modalContent.querySelector('.close-modal-btn').addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+
+            modal.classList.add('active');
+        }
+
+        function copyListingCaption(id) {
+            const listing = listings.find(l => l.id === id);
+            if (!listing || !listing.caption) {
+                alert('没有可复制的文案');
+                return;
+            }
+
+            navigator.clipboard.writeText(listing.caption).then(() => {
+                alert('文案已复制！');
+            }).catch(err => {
+                console.error(err);
+                alert('复制失败');
+            });
+        }
+
+        function downloadImages(id) {
+            const listing = listings.find(l => l.id === id);
+            if (!listing || !listing.images || !listing.images.length) {
+                alert('没有可下载的图片');
+                return;
+            }
+
+            listing.images.forEach((img, idx) => {
+                const link = document.createElement('a');
+                link.href = img;
+                link.download = `${listing.location}_${idx + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            alert('图片下载已启动！');
+        }
+
+        async function deleteListing(id) {
+            if (!confirm('确定要删除这条房源吗？')) return;
+
+            try {
+                const { db, deleteDoc, doc } = window._firestore;
+                await deleteDoc(doc(db, "listings", id));
+                await loadListingsFromFirestore();
+                updateDashboard();
+                refreshListings();
+                refreshMyListings();
+                alert('删除成功！');
+            } catch (err) {
+                console.error(err);
+                alert('删除失败');
+            }
+        }
+
+        function refreshListings() {
+            const container = document.getElementById('listingsContainer');
+            container.innerHTML = '';
+            listings.forEach(listing => {
+                container.appendChild(createListingCard(listing));
+            });
+        }
+
+        function refreshMyListings() {
+            const container = document.getElementById('myListingsContainer');
+            container.innerHTML = '';
+            listings.filter(l => l.user === currentUser).forEach(listing => {
+                container.appendChild(createListingCard(listing));
+            });
+        }
+
+        // 关闭模态框
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('listingModal').classList.remove('active');
+        });
+
+        document.getElementById('listingModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+
+</html>
