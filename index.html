@@ -1340,10 +1340,10 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
             <div class="listing-card-info">
                 ${listing.bedrooms}房 | ${listing.bathrooms}厕 | ${listing.area}尺
             </div>
-            <div class="listing-card-actions">
-                <button class="btn btn-small btn-primary" onclick="viewListing('${listing.id}')">查看详情</button>
-                ${listing.user === currentUser ? `<button class="btn btn-small btn-danger" onclick="deleteListing('${listing.id}')">删除</button>` : ''}
-            </div>
+<div class="listing-card-actions">
+      <button class="btn btn-small btn-primary" onclick="viewListing('${listing.id}')">查看详情</button>
+      ${listing.user === currentUser ? `<button class="btn btn-small btn-danger" onclick="deleteListing('${listing.id}')">删除</button>` : ''}
+</div>
         </div>
     `;
     return card;
