@@ -1130,33 +1130,32 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
         }
 
         function createListingCard(listing) {
-            const card = document.createElement('div');
-            card.className = 'listing-card';
+    const card = document.createElement('div');
+    card.className = 'listing-card';
+    
+    const priceRM = listing.price.toLocaleString();
+    const imageDisplay = listing.images && listing.images.length > 0 ? 
+        `<img src="${listing.images[0]}" alt="${listing.type}">` : 
+        '<span>暂无图片</span>';
 
-            const priceRM = listing.price.toLocaleString();
-            const imageDisplay = listing.images && listing.images.length > 0 ? 
-                `<img src="${listing.images[0]}" alt="${listing.type}">` : 
-                '<span>暂无图片</span>';
-
-            card.innerHTML = `
-                <div class="listing-card-image">
-                    ${imageDisplay}
-                </div>
-                <div class="listing-card-content">
-                    <div class="listing-card-title">${listing.type} - ${listing.location}</div>
-                    <div class="listing-card-price">RM ${priceRM}</div>
-                    <div class="listing-card-info">
-                        ${listing.bedrooms}房 | ${listing.bathrooms}厕 | ${listing.area}尺
-                    </div>
-                    <div class="listing-card-actions">
-                        <button class="btn btn-small btn-primary" onclick="viewListing(${listing.id})">查看详情</button>
-                        ${listing.user === currentUser ? `<button class="btn btn-small btn-danger" onclick="deleteListing(${listing.id})">删除</button>` : ''}
-                    </div>
-                </div>
-            `;
-
-            return card;
-        }
+    card.innerHTML = `
+        <div class="listing-card-image">
+            ${imageDisplay}
+        </div>
+        <div class="listing-card-content">
+            <div class="listing-card-title">${listing.type} - ${listing.location}</div>
+            <div class="listing-card-price">RM ${priceRM}</div>
+            <div class="listing-card-info">
+                ${listing.bedrooms}房 | ${listing.bathrooms}厕 | ${listing.area}尺
+            </div>
+            <div class="listing-card-actions">
+                <button class="btn btn-small btn-primary" onclick="viewListing('${listing.id}')">查看详情</button>
+                ${listing.user === currentUser ? `<button class="btn btn-small btn-danger" onclick="deleteListing('${listing.id}')">删除</button>` : ''}
+            </div>
+        </div>
+    `;
+    return card;
+}
 
         function viewListing(id) {
             const listing = listings.find(l => l.id === id);
