@@ -581,6 +581,29 @@
             }
         }
     </style>
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { 
+    getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc 
+  } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCeVd0dSa1c7Pe7GrkbLQhv_t1SiY7msyU",
+    authDomain: "wehome-listings.firebaseapp.com",
+    projectId: "wehome-listings",
+    storageBucket: "wehome-listings.firebasestorage.app",
+    messagingSenderId: "803741960436",
+    appId: "1:803741960436:web:c4bf134af50d59c80676a1",
+    measurementId: "G-TL44X75XBG"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 暴露给下面的普通 <script> 用
+  window._firestore = { db, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc };
+</script>
+
 <script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764321776899&amp;type=content-script&amp;dmn=ppl-ai-code-interpreter-files.s3.amazonaws.com&amp;url=https%3A%2F%2Fppl-ai-code-interpreter-files.s3.amazonaws.com%2Fweb%2Fdirect-files%2F71789cc1334e8216aa30668382a9a64d%2F469406d4-7ca6-4a90-a70b-86daffa555d5%2F03875b06.html%3Fresponse-content-disposition%3Dattachment%253B%2520filename%253Dreal_estate_platform.html%253B%2520filename%252A%253DUTF-8%2527%2527real_estate_platform.html%26AWSAccessKeyId%3DASIA2F3EMEYE2UUS42J2%26Signature%3DYgHev2T5in64DA5xhokVxuMWHu8%253D%26x-amz-security-token%3DIQoJb3JpZ2luX2VjEOv%252F%252F%252F%252F%252F%252F%252F%252F%252F%252FwEaCXVzLWVhc3QtMSJGMEQCIG5Ns9LV4eplEXo2nYSabzb749IhwgdEHU%252FJNIxWuQj%252FAiB3yoBgpgPR50Uvy6Dx7gxp2Q10Ztvod%252B7SifZ7ckNtsir8BAiz%252F%252F%252F%252F%252F%252F%252F%252F%252F%252F8BEAEaDDY5OTc1MzMwOTcwNSIMythVU1SUlX%252Fqyu7MKtAEF9MMoZILozLFHKkQPI2ers5qTO2KAvv%252Bjl1D7tNbiXRx4qFQ%252FpwPR5t1n82OtI4AtXyrU2BR0q%252BKz9NHdCDf97wezx9OP9vWesQnfNtXqqFIIYjQWA8yvRD0xJv0AnLap99gmCmfdKumZH5sbsjDEUjxy7UBgRo5BpnRbjbeertxpG7b1jLrQ6pYYmoH4IIQa3qASDPHPj1t%252F1plzh5oh8Cl%252FyaSXDX4T%252B9zV77vYCJZxqKVomcdNTAdM3%252FV4G4Jn%252FDbptZilO2IOG%252BIr3xMSfG9MfUTuXFlXrb2BA7ixXeKJaxANv29YI1RIYwCWw2lbj103OYzZ4pDKDFPjwe1sjooMt37xSPlQ9Zhuk78m5ZiKMQsPeKgceX2Im6a%252Bqp2roRhdAxSgxJqNK8XS9A%252BwD%252Bn%252FobBs1Akjunw5A2wFZuFJWFrSKRDfXj8dsElwsLEIVGR6z842a633sO%252FqQ98FX9wn68o%252F1WAe5KPbtHpAMsd%252B%252B4Z2t%252F51f8I5CGs8jgrRhEs6f4zSI1VgQO%252FlV8gSThUnKZKiFj1jNKZUqUtM1UGL4eoCAM7GqMv3TYY86HaJa0LCfw92QR0reetK33q041IQdZplRfcaJP1TtGxOK%252FwwSx5No%252FNTwmLfBx7Q%252BRXZJRP8R4Xzc%252Bi%252Bk7mSQhGkO2jdLkQZdo2j%252FPyd%252BGdcvQjxUAMa%252B%252BlHajmdY0s%252FqBMdIoZDXVmdLHn43XaVN71GaCN2Lc6OTib57Qa0ApmLeOgL6pCVEGBoo8Xxd2ppcegODQSboZX00nbLhreo1hCljC%252B7qXJBjqZAVp4QrueifKDdAL3sfxZxGwkpTqwM70bPkXSYwjWwipSKBzM3fXN4XIGqvLoikaX428%252Bvj2idwS2S25kFwf0ki5ekDaMZ%252FX2UdyOGNWG8kfmLWRXEiv3vJEvKZD9aWL7AJgo56RCxn5JM74yvGfaQTkXl5NNRSFhHKEjcmGA0x3UNCLTmwYqTV0fM4VHoZ6AXxB3%252FNq9Cv%252F3HA%253D%253D%26Expires%3D1764325801&amp;app=chrome.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-dnt"></script><script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764321776899&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script></head>
 <body>
     <!-- 登录页面 -->
@@ -830,50 +853,58 @@
     </div>
 
     <script>
-        // ==================== 数据存储 ====================
-        let users = {
-            admin: { password: '123456', role: 'admin' },
-            agent1: { password: '123456', role: 'agent' },
-            agent2: { password: '123456', role: 'agent' }
-        };
+       // ==================== 数据存储 ====================
+let users = {
+    admin: { password: '123456', role: 'admin' },
+    agent1: { password: '123456', role: 'agent' },
+    agent2: { password: '123456', role: 'agent' }
+};
 
-        let listings = [
-            {
-                id: 1,
-                user: 'admin',
-                type: '公寓',
-                location: 'Petaling Jaya, KL',
-                price: 450000,
-                area: 1200,
-                bedrooms: 3,
-                bathrooms: 2,
-                features: ['空调', '停车位', '保安门'],
-                images: ['data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22200%22%3E%3Crect fill=%223498db%22 width=%22300%22 height=%22200%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2224%22%3E样本房产图片%3C/text%3E%3C/svg%3E'],
-                caption: '【推荐】Petaling Jaya精选公寓\n✓ 3房2厕，面积1200尺\n✓ 配套：空调、停车位、保安门\n✓ 现价仅RM 450,000！\n欢迎看房，诚心者联系！',
-                date: new Date().toISOString()
-            }
-        ];
+// 房源数组由 Firestore 填充
+let listings = [];
+
+// 从 Firestore 拉取房源
+async function loadListingsFromFirestore() {
+    const { db, collection, getDocs, query, orderBy } = window._firestore;
+    const q = query(collection(db, "listings"), orderBy("date", "desc"));
+    const snap = await getDocs(q);
+    listings = [];
+    snap.forEach(docSnap => {
+        const data = docSnap.data();
+        listings.push({
+            id: docSnap.id,
+            ...data
+        });
+    });
+}
+
 
         let currentUser = null;
 
         // ==================== 登录系统 ====================
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+   document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-            if (users[username] && users[username].password === password) {
-                currentUser = username;
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('mainApp').classList.add('active');
-                document.getElementById('currentUser').textContent = username;
-                document.getElementById('settingsUsername').value = username;
-                updateDashboard();
-                startClock();
-            } else {
-                alert('用户名或密码错误！');
-            }
-        });
+    if (users[username] && users[username].password === password) {
+        currentUser = username;
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('mainApp').classList.add('active');
+        document.getElementById('currentUser').textContent = username;
+        document.getElementById('settingsUsername').value = username;
+
+        // 登录后先从 Firestore 拉一次数据
+        await loadListingsFromFirestore();
+        updateDashboard();
+        refreshListings();
+        refreshMyListings();
+        startClock();
+    } else {
+        alert('用户名或密码错误！');
+    }
+});
+
 
         // ==================== 登出 ====================
         document.getElementById('logoutBtn').addEventListener('click', function() {
@@ -1025,40 +1056,50 @@
         }
 
         // ==================== 上传房源 ====================
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-            if (uploadedImages.length === 0) {
-                alert('请至少上传一张图片');
-                return;
-            }
+    if (uploadedImages.length === 0) {
+        alert('请至少上传一张图片');
+        return;
+    }
 
-            const newListing = {
-                id: listings.length + 1,
-                user: currentUser,
-                type: document.getElementById('propertyType').value,
-                location: document.getElementById('location').value,
-                price: parseInt(document.getElementById('price').value),
-                area: parseInt(document.getElementById('area').value),
-                bedrooms: parseInt(document.getElementById('bedrooms').value),
-                bathrooms: parseInt(document.getElementById('bathrooms').value),
-                features: document.getElementById('features').value.split(',').map(f => f.trim()),
-                description: document.getElementById('description').value,
-                images: uploadedImages,
-                caption: document.getElementById('generatedCaption').textContent,
-                date: new Date().toISOString()
-            };
+    const newListing = {
+        user: currentUser,
+        type: document.getElementById('propertyType').value,
+        location: document.getElementById('location').value,
+        price: parseInt(document.getElementById('price').value),
+        area: parseInt(document.getElementById('area').value),
+        bedrooms: parseInt(document.getElementById('bedrooms').value),
+        bathrooms: parseInt(document.getElementById('bathrooms').value),
+        features: document.getElementById('features').value.split(',').map(f => f.trim()),
+        description: document.getElementById('description').value,
+        images: uploadedImages,
+        caption: document.getElementById('generatedCaption').textContent,
+        date: new Date().toISOString()
+    };
 
-            listings.push(newListing);
-            alert('房源发布成功！');
+    try {
+        const { db, collection, addDoc } = window._firestore;
+        await addDoc(collection(db, "listings"), newListing);
 
-            document.getElementById('uploadForm').reset();
-            uploadedImages = [];
-            document.getElementById('imagePreview').innerHTML = '';
-            document.getElementById('generatedCaption').innerHTML = '';
+        alert('房源发布成功！（已存到云端）');
 
-            updateDashboard();
-        });
+        document.getElementById('uploadForm').reset();
+        uploadedImages = [];
+        document.getElementById('imagePreview').innerHTML = '';
+        document.getElementById('generatedCaption').innerHTML = '';
+
+        await loadListingsFromFirestore();
+        updateDashboard();
+        refreshListings();
+        refreshMyListings();
+    } catch (err) {
+        console.error(err);
+        alert('房源发布失败，请稍后再试');
+    }
+});
+
 
         // ==================== 房源展示 ====================
         function refreshListings() {
@@ -1204,14 +1245,22 @@
             alert('图片下载已启动！');
         }
 
-        function deleteListing(id) {
-            if (confirm('确定要删除这个房源吗？')) {
-                listings = listings.filter(l => l.id !== id);
-                refreshMyListings();
-                updateDashboard();
-                alert('房源已删除');
-            }
-        }
+async function deleteListing(id) {
+    if (!confirm('确定要删除这个房源吗？')) return;
+
+    try {
+        const { db, deleteDoc, doc } = window._firestore;
+        await deleteDoc(doc(db, "listings", id));
+        await loadListingsFromFirestore();
+        refreshListings();
+        refreshMyListings();
+        updateDashboard();
+        alert('房源已删除（云端已同步）');
+    } catch (err) {
+        console.error(err);
+        alert('删除失败，请稍后再试');
+    }
+}
 
         // ==================== 模态框关闭 ====================
         document.getElementById('closeModal').addEventListener('click', function() {
