@@ -581,11 +581,14 @@
             }
         }
     </style>
-    <script type="module">
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import { 
-    getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc 
+    getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc 
   } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  import { 
+    getStorage, ref, uploadBytes, getDownloadURL 
+  } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCeVd0dSa1c7Pe7GrkbLQhv_t1SiY7msyU",
@@ -599,10 +602,13 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const storage = getStorage(app);
 
-  // 暴露给下面的普通 <script> 用
-  window._firestore = { db, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc };
+  // 给下面普通 <script> 用
+  window._firestore = { db, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc };
+  window._storage = { storage, ref, uploadBytes, getDownloadURL };
 </script>
+
 
 <script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764321776899&amp;type=content-script&amp;dmn=ppl-ai-code-interpreter-files.s3.amazonaws.com&amp;url=https%3A%2F%2Fppl-ai-code-interpreter-files.s3.amazonaws.com%2Fweb%2Fdirect-files%2F71789cc1334e8216aa30668382a9a64d%2F469406d4-7ca6-4a90-a70b-86daffa555d5%2F03875b06.html%3Fresponse-content-disposition%3Dattachment%253B%2520filename%253Dreal_estate_platform.html%253B%2520filename%252A%253DUTF-8%2527%2527real_estate_platform.html%26AWSAccessKeyId%3DASIA2F3EMEYE2UUS42J2%26Signature%3DYgHev2T5in64DA5xhokVxuMWHu8%253D%26x-amz-security-token%3DIQoJb3JpZ2luX2VjEOv%252F%252F%252F%252F%252F%252F%252F%252F%252F%252FwEaCXVzLWVhc3QtMSJGMEQCIG5Ns9LV4eplEXo2nYSabzb749IhwgdEHU%252FJNIxWuQj%252FAiB3yoBgpgPR50Uvy6Dx7gxp2Q10Ztvod%252B7SifZ7ckNtsir8BAiz%252F%252F%252F%252F%252F%252F%252F%252F%252F%252F8BEAEaDDY5OTc1MzMwOTcwNSIMythVU1SUlX%252Fqyu7MKtAEF9MMoZILozLFHKkQPI2ers5qTO2KAvv%252Bjl1D7tNbiXRx4qFQ%252FpwPR5t1n82OtI4AtXyrU2BR0q%252BKz9NHdCDf97wezx9OP9vWesQnfNtXqqFIIYjQWA8yvRD0xJv0AnLap99gmCmfdKumZH5sbsjDEUjxy7UBgRo5BpnRbjbeertxpG7b1jLrQ6pYYmoH4IIQa3qASDPHPj1t%252F1plzh5oh8Cl%252FyaSXDX4T%252B9zV77vYCJZxqKVomcdNTAdM3%252FV4G4Jn%252FDbptZilO2IOG%252BIr3xMSfG9MfUTuXFlXrb2BA7ixXeKJaxANv29YI1RIYwCWw2lbj103OYzZ4pDKDFPjwe1sjooMt37xSPlQ9Zhuk78m5ZiKMQsPeKgceX2Im6a%252Bqp2roRhdAxSgxJqNK8XS9A%252BwD%252Bn%252FobBs1Akjunw5A2wFZuFJWFrSKRDfXj8dsElwsLEIVGR6z842a633sO%252FqQ98FX9wn68o%252F1WAe5KPbtHpAMsd%252B%252B4Z2t%252F51f8I5CGs8jgrRhEs6f4zSI1VgQO%252FlV8gSThUnKZKiFj1jNKZUqUtM1UGL4eoCAM7GqMv3TYY86HaJa0LCfw92QR0reetK33q041IQdZplRfcaJP1TtGxOK%252FwwSx5No%252FNTwmLfBx7Q%252BRXZJRP8R4Xzc%252Bi%252Bk7mSQhGkO2jdLkQZdo2j%252FPyd%252BGdcvQjxUAMa%252B%252BlHajmdY0s%252FqBMdIoZDXVmdLHn43XaVN71GaCN2Lc6OTib57Qa0ApmLeOgL6pCVEGBoo8Xxd2ppcegODQSboZX00nbLhreo1hCljC%252B7qXJBjqZAVp4QrueifKDdAL3sfxZxGwkpTqwM70bPkXSYwjWwipSKBzM3fXN4XIGqvLoikaX428%252Bvj2idwS2S25kFwf0ki5ekDaMZ%252FX2UdyOGNWG8kfmLWRXEiv3vJEvKZD9aWL7AJgo56RCxn5JM74yvGfaQTkXl5NNRSFhHKEjcmGA0x3UNCLTmwYqTV0fM4VHoZ6AXxB3%252FNq9Cv%252F3HA%253D%253D%26Expires%3D1764325801&amp;app=chrome.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-dnt"></script><script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764321776899&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script></head>
 <body>
