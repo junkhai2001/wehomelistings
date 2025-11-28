@@ -1039,7 +1039,8 @@ async function loadListingsFromFirestore() {
         }
 
         // ==================== 图片上传 ====================
-        let uploadedImages = [];
+        let uploadedImages = []; // 预览用（Base64）
+        let uploadedFiles = []; // 真正要上传到 Storage 的原始 File
 
         document.getElementById('imageUpload').addEventListener('click', function() {
             document.getElementById('imageInput').click();
@@ -1064,23 +1065,28 @@ async function loadListingsFromFirestore() {
             handleImages(this.files);
         });
 
-        function handleImages(files) {
-            if (uploadedImages.length + files.length > 10) {
-                alert('最多只能上传10张图片');
-                return;
-            }
+function handleImages(files) {
+    if (uploadedImages.length + files.length > 10) {
+        alert('最多只能上传10张图片');
+        return;
+    }
 
-            for (let file of files) {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        uploadedImages.push(e.target.result);
-                        displayImagePreviews();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
+    for (let file of files) {
+        if (file.type.startsWith('image/')) {
+            // 1) 先把原始文件存起来，后面上传 Storage 用
+            uploadedFiles.push(file);
+
+            // 2) 再生成 Base64 预览给前端看
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImages.push(e.target.result);
+                displayImagePreviews();
+            };
+            reader.readAsDataURL(file);
         }
+    }
+}
+
 
         function displayImagePreviews() {
             const preview = document.getElementById('imagePreview');
@@ -1096,10 +1102,12 @@ async function loadListingsFromFirestore() {
             });
         }
 
-        function removeImage(index) {
-            uploadedImages.splice(index, 1);
-            displayImagePreviews();
-        }
+function removeImage(index) {
+    uploadedImages.splice(index, 1);
+    uploadedFiles.splice(index, 1); // 同时删除对应的原始 File
+    displayImagePreviews();
+}
+
 
         // ==================== 自动文案生成 ====================
         document.getElementById('generateCaption').addEventListener('click', function(e) {
