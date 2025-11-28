@@ -715,94 +715,94 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>价格 (RM) *</label>
-                                <input type="number" id="price" placeholder="例：1000" required>
+                                <input type="text" id="price" placeholder="例：1000" required>
                             </div>
                             <div class="form-group">
                                 <label>面积 (sq.ft) *</label>
-                                <input type="number" id="area" placeholder="例：22x70 or 1540" required>
+                                <input type="text" id="area" placeholder="例：22x70 or 1540" required>
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>房间</label>
-                                <input type="number" id="bedrooms" value="0">
-                            </div>
-                            <div class="form-group">
-                                <label>浴室</label>
-                                <input type="number" id="bathrooms" value="0">
-                            </div>
-                        </div>
+ <div class="form-row">
+    <div class="form-group">
+        <label>房间</label>
+        <input type="number" id="bedrooms" value="0">
+    </div>
+    <div class="form-group">
+        <label>浴室</label>
+        <input type="number" id="bathrooms" value="0">
+    </div>
+</div>
 
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>楼层</label>
-                                <input type="text" id="features" placeholder="Floor, Example GF 1F 2F ... 15F, 16F">
-                            </div>
-                        </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>楼层</label>
+        <input type="text" id="floor" placeholder="Floor, Example GF 1F 2F ... 15F, 16F">
+    </div>
+</div>
 
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>停车位</label>
-                                <input type="text" id="features" placeholder="0, 1, 2 or Open (No Limit)">
-                            </div>
-                        </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>停车位</label>
+        <input type="text" id="carpark" placeholder="0, 1, 2 or Open (No Limit)">
+    </div>
+</div>
 
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>Direction 朝向</label>
-                                <input type="text" id="features" placeholder="North, West, Southeast etc..">
-                            </div>
-                        </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>Direction 朝向</label>
+        <input type="text" id="direction" placeholder="North, West, Southeast etc..">
+    </div>
+</div>
 
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>家私Furnished</label>
-                                <input type="text" id="features" placeholder="Fully, Partially or No">
-                            </div>
-                        </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>家私 Furnished</label>
+        <input type="text" id="furnished" placeholder="Fully, Partially or No">
+    </div>
+</div>
 
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>Security Deposit</label>
-                                <input type="text" id="features" placeholder="1 or 2">
-                            </div>
-                        </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>Security Deposit</label>
+        <input type="text" id="securityDeposit" placeholder="1 or 2">
+    </div>
+</div>
 
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>Utilities Deposit</label>
-                                <input type="text" id="features" placeholder="0.5, 1 or Own Apply">
-                            </div>
-                        </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>Utilities Deposit</label>
+        <input type="text" id="utilitiesDeposit" placeholder="0.5, 1 or Own Apply">
+    </div>
+</div>
 
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>Other Deposit</label>
-                                <input type="text" id="features" placeholder="Renovation Deposit etc..">
-                            </div>
-                        </div>
-                        
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>Remarks</label>
-                                <textarea id="description" placeholder="Race, No Indian, =Electric n Water Supply Cutted Off"></textarea>
-                            </div>
-                        </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>Other Deposit</label>
+        <input type="text" id="otherDeposit" placeholder="Renovation Deposit etc..">
+    </div>
+</div>
 
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>Agent Name</label>
-                                <textarea id="description" placeholder="Jun Khai"></textarea>
-                            </div>
-                        </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>Remarks</label>
+        <textarea id="remarks" placeholder="Race, No Indian, =Electric n Water Supply Cutted Off"></textarea>
+    </div>
+</div>
 
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>Address</label>
-                                <textarea id="description" placeholder="No 6-1, Jalan Rahmat 4, Taman Malim Jaya"></textarea>
-                            </div>
-                        </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>Agent Name</label>
+        <textarea id="agentName" placeholder="Jun Khai"></textarea>
+    </div>
+</div>
+
+<div class="form-row full">
+    <div class="form-group">
+        <label>Address</label>
+        <textarea id="address" placeholder="No 6-1, Jalan Rahmat 4, Taman Malim Jaya"></textarea>
+    </div>
+</div>
 
                         <div class="form-row full">
                             <div class="form-group">
@@ -1120,20 +1120,32 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
         return;
     }
 
-    const newListing = {
-        user: currentUser,
-        type: document.getElementById('propertyType').value,
-        location: document.getElementById('location').value,
-        price: parseInt(document.getElementById('price').value),
-        area: parseInt(document.getElementById('area').value),
-        bedrooms: parseInt(document.getElementById('bedrooms').value),
-        bathrooms: parseInt(document.getElementById('bathrooms').value),
-        features: document.getElementById('features').value.split(',').map(f => f.trim()),
-        description: document.getElementById('description').value,
-        images: uploadedImages,
-        caption: document.getElementById('generatedCaption').textContent,
-        date: new Date().toISOString()
-    };
+const newListing = {
+    user: currentUser,
+    type: document.getElementById('propertyType').value,
+    location: document.getElementById('location').value,
+    price: parseInt(document.getElementById('price').value),
+    area: parseInt(document.getElementById('area').value),
+    bedrooms: parseInt(document.getElementById('bedrooms').value),
+    bathrooms: parseInt(document.getElementById('bathrooms').value),
+
+    // 新增字段
+    floor: document.getElementById('floor').value,
+    carpark: document.getElementById('carpark').value,
+    direction: document.getElementById('direction').value,
+    furnished: document.getElementById('furnished').value,
+    securityDeposit: document.getElementById('securityDeposit').value,
+    utilitiesDeposit: document.getElementById('utilitiesDeposit').value,
+    otherDeposit: document.getElementById('otherDeposit').value,
+    remarks: document.getElementById('remarks').value,
+    agentName: document.getElementById('agentName').value,
+    address: document.getElementById('address').value,
+
+    images: uploadedImages,
+    caption: document.getElementById('generatedCaption').textContent,
+    date: new Date().toISOString()
+};
+
 
     try {
         const { db, collection, addDoc } = window._firestore;
