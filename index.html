@@ -1265,6 +1265,20 @@ const newListing = {
                         <p><strong>发布时间：</strong> ${new Date(listing.date).toLocaleDateString('zh-CN')}</p>
                     </div>
                 </div>
+<div style="margin-bottom: 20px;">
+    <h3>详细资料</h3>
+    <p><strong>楼层：</strong> ${listing.floor || '-'}</p>
+    <p><strong>停车位：</strong> ${listing.carpark || '-'}</p>
+    <p><strong>朝向：</strong> ${listing.direction || '-'}</p>
+    <p><strong>家私：</strong> ${listing.furnished || '-'}</p>
+    <p><strong>Security Deposit：</strong> ${listing.securityDeposit || '-'}</p>
+    <p><strong>Utilities Deposit：</strong> ${listing.utilitiesDeposit || '-'}</p>
+    <p><strong>Other Deposit：</strong> ${listing.otherDeposit || '-'}</p>
+    <p><strong>Agent：</strong> ${listing.agentName || '-'}</p>
+    <p><strong>地址：</strong> ${listing.address || '-'}</p>
+    <p><strong>备注：</strong> ${listing.remarks || '-'}</p>
+</div>
+
 
                 <div style="margin-bottom: 20px;">
                     <h3>特色</h3>
