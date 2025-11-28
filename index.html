@@ -1367,106 +1367,121 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
     return card;
 }
 
-        function viewListing(id) {
-            const listing = listings.find(l => l.id === id);
-            if (!listing) return;
+function viewListing(id) {
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
 
-            const modal = document.getElementById('listingModal');
-            const modalContent = document.getElementById('modalContent');
+    const modal = document.getElementById('listingModal');
+    const modalContent = document.getElementById('modalContent');
 
-            let galleryHTML = '';
-            if (listing.images && listing.images.length > 0) {
-                galleryHTML = `
-                    <img src="${listing.images[0]}" class="listing-detail-image" id="mainImage" alt="${listing.type}">
-                    ${listing.images.length > 1 ? `
-                        <div class="listing-detail-gallery">
-                            ${listing.images.map((img, idx) => `
-                                <img src="${img}" alt="photo ${idx+1}" onclick="document.getElementById('mainImage').src='${img}'">
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                `;
-            }
-
-            const featureList = listing.features && listing.features.length > 0 ?
-                listing.features.map(f => `<li>✓ ${f}</li>`).join('') :
-                '<li>无特色信息</li>';
-
-            modalContent.innerHTML = `
-                <h2 style="margin-bottom: 20px;">${listing.type} - ${listing.location}</h2>
-                ${galleryHTML}
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div>
-                        <p><strong style="color: #27ae60; font-size: 18px;">RM ${listing.price.toLocaleString()}</strong></p>
-                        <p><strong>面积：</strong> ${listing.area} 平方尺</p>
-                        <p><strong>房间：</strong> ${listing.bedrooms} 房 ${listing.bathrooms} 厕</p>
-                    </div>
-                    <div>
-                        <p><strong>发布者：</strong> ${listing.user}</p>
-                        <p><strong>发布时间：</strong> ${new Date(listing.date).toLocaleDateString('zh-CN')}</p>
-                    </div>
+    let galleryHTML = '';
+    if (listing.images && listing.images.length > 0) {
+        galleryHTML = `
+            <img src="${listing.images[0]}" class="listing-detail-image" id="mainImage" alt="${listing.type}">
+            ${listing.images.length > 1 ? `
+                <div class="listing-detail-gallery">
+                    ${listing.images.map((img, idx) => `
+                        <img src="${img}" alt="photo ${idx+1}" onclick="document.getElementById('mainImage').src='${img}'">
+                    `).join('')}
                 </div>
-<div style="margin-bottom: 20px;">
-    <h3>详细资料</h3>
-    <p><strong>楼层：</strong> ${listing.floor || '-'}</p>
-    <p><strong>停车位：</strong> ${listing.carpark || '-'}</p>
-    <p><strong>朝向：</strong> ${listing.direction || '-'}</p>
-    <p><strong>家私：</strong> ${listing.furnished || '-'}</p>
-    <p><strong>Security Deposit：</strong> ${listing.securityDeposit || '-'}</p>
-    <p><strong>Utilities Deposit：</strong> ${listing.utilitiesDeposit || '-'}</p>
-    <p><strong>Other Deposit：</strong> ${listing.otherDeposit || '-'}</p>
-    <p><strong>Agent：</strong> ${listing.agentName || '-'}</p>
-    <p><strong>地址：</strong> ${listing.address || '-'}</p>
-    <p><strong>备注：</strong> ${listing.remarks || '-'}</p>
-</div>
+            ` : ''}
+        `;
+    }
 
+    const featureList = listing.features && listing.features.length > 0 ?
+        listing.features.map(f => `<li>✓ ${f}</li>`).join('') :
+        '<li>无特色信息</li>';
 
-                <div style="margin-bottom: 20px;">
-                    <h3>特色</h3>
-                    <ul>${featureList}</ul>
-                </div>
+    modalContent.innerHTML = `
+        <h2 style="margin-bottom: 20px;">${listing.type} - ${listing.location}</h2>
+        ${galleryHTML}
 
-                ${listing.description ? `
-                    <div style="margin-bottom: 20px;">
-                        <h3>描述</h3>
-                        <p>${listing.description.replace(/\n/g, '<br>')}</p>
-                    </div>
-                ` : ''}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div>
+                <p><strong style="color: #27ae60; font-size: 18px;">RM ${listing.price.toLocaleString()}</strong></p>
+                <p><strong>面积：</strong> ${listing.area} 平方尺</p>
+                <p><strong>房间：</strong> ${listing.bedrooms} 房 ${listing.bathrooms} 厕</p>
+            </div>
+            <div>
+                <p><strong>发布者：</strong> ${listing.user}</p>
+                <p><strong>发布时间：</strong> ${new Date(listing.date).toLocaleDateString('zh-CN')}</p>
+            </div>
+        </div>
 
-                <div style="margin-bottom: 20px;">
-                    <h3>房源文案</h3>
-                    <div class="generated-caption">${listing.caption ? listing.caption.replace(/\n/g, '<br>') : '暂无文案'}</div>
-                </div>
+        <div style="margin-bottom: 20px;">
+            <h3>详细资料</h3>
+            <p><strong>楼层：</strong> ${listing.floor || '-'}</p>
+            <p><strong>停车位：</strong> ${listing.carpark || '-'}</p>
+            <p><strong>朝向：</strong> ${listing.direction || '-'}</p>
+            <p><strong>家私：</strong> ${listing.furnished || '-'}</p>
+            <p><strong>Security Deposit：</strong> ${listing.securityDeposit || '-'}</p>
+            <p><strong>Utilities Deposit：</strong> ${listing.utilitiesDeposit || '-'}</p>
+            <p><strong>Other Deposit：</strong> ${listing.otherDeposit || '-'}</p>
+            <p><strong>Agent：</strong> ${listing.agentName || '-'}</p>
+            <p><strong>地址：</strong> ${listing.address || '-'}</p>
+            <p><strong>备注：</strong> ${listing.remarks || '-'}</p>
+        </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-primary" onclick="copyCaption('${listing.caption.replace(/'/g, "\'")}')">📋 复制文案</button>
-                    <button class="btn btn-secondary" onclick="downloadImages(${listing.id})">📥 下载所有图片</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('listingModal').classList.remove('active')">关闭</button>
-                </div>
-            `;
+        <div style="margin-bottom: 20px;">
+            <h3>特色</h3>
+            <ul>${featureList}</ul>
+        </div>
 
-            modal.classList.add('active');
-        }
+        ${listing.description ? `
+            <div style="margin-bottom: 20px;">
+                <h3>描述</h3>
+                <p>${listing.description.replace(/\n/g, '<br>')}</p>
+            </div>
+        ` : ''}
 
-        function copyCaption(caption) {
-            navigator.clipboard.writeText(caption).then(() => {
-                alert('文案已复制到剪贴板！');
-            });
-        }
+        <div style="margin-bottom: 20px;">
+            <h3>房源文案</h3>
+            <div class="generated-caption">${listing.caption ? listing.caption.replace(/\n/g, '<br>') : '暂无文案'}</div>
+        </div>
 
-        function downloadImages(id) {
-            const listing = listings.find(l => l.id === id);
-            if (!listing || !listing.images) return;
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="copyListingCaption('${listing.id}')">📋 复制文案</button>
+            <button class="btn btn-secondary" onclick="downloadImages('${listing.id}')">📥 下载所有图片</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('listingModal').classList.remove('active')">关闭</button>
+        </div>
+    `;
 
-            listing.images.forEach((img, idx) => {
-                const link = document.createElement('a');
-                link.href = img;
-                link.download = `${listing.location}_${idx + 1}.jpg`;
-                link.click();
-            });
-            alert('图片下载已启动！');
-        }
+    modal.classList.add('active');
+}
+
+function copyListingCaption(id) {
+    const listing = listings.find(l => l.id === id);
+    if (!listing || !listing.caption) {
+        alert('没有可复制的文案');
+        return;
+    }
+
+    navigator.clipboard.writeText(listing.caption).then(() => {
+        alert('文案已复制到剪贴板！');
+    }).catch(err => {
+        console.error(err);
+        alert('复制失败，请手动选中文案复制');
+    });
+}
+
+function downloadImages(id) {
+    const listing = listings.find(l => l.id === id);
+    if (!listing || !listing.images || !listing.images.length) {
+        alert('没有可下载的图片');
+        return;
+    }
+
+    listing.images.forEach((img, idx) => {
+        const link = document.createElement('a');
+        link.href = img;
+        link.download = `${listing.location}_${idx + 1}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    alert('图片下载已启动！');
+}
 
 async function deleteListing(id) {
     if (!confirm('确定要删除这个房源吗？')) return;
