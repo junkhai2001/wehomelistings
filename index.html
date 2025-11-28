@@ -1105,18 +1105,17 @@ async function loadListingsFromFirestore() {
             const area = document.getElementById('area').value;
             const bedrooms = document.getElementById('bedrooms').value;
             const bathrooms = document.getElementById('bathrooms').value;
-            const features = document.getElementById('features').value;
 
             if (!type || !location || !price || !area) {
                 alert('请先填写房产类型、位置、价格和面积');
                 return;
             }
 
-            const caption = generateCaption(type, location, price, area, bedrooms, bathrooms, features);
+            const caption = generateCaption(type, location, price, area, bedrooms, bathrooms);
             document.getElementById('generatedCaption').innerHTML = `<div class="generated-caption">${caption}</div>`;
         });
 
-function generateCaption(type, location, price, area, bedrooms, bathrooms, features) {
+function generateCaption(type, location, price, area, bedrooms, bathrooms) {
     // 读取你表单里的更多字段
     const furnished = document.getElementById('furnished')?.value || '';          // Fully / Partially / No
     const floor = document.getElementById('floor')?.value || '';
