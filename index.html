@@ -856,6 +856,33 @@
                 });
             });
         }
+        // 读取最近 7 天删除的房源
+async function loadDeletedListingsLast7Days() {
+    const { db, collection, getDocs } = window._firestore;
+    const deletedCol = collection(db, "deleted_listings");
+    const snap = await getDocs(deletedCol);
+
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const deleted = [];
+    snap.forEach(docSnap => {
+        const data = docSnap.data();
+        if (!data.deletedAt) return;
+        const delDate = new Date(data.deletedAt);
+        if (delDate >= sevenDaysAgo) {
+            deleted.push({
+                id: docSnap.id,
+                ...data
+            });
+        }
+    });
+
+    // 按删除时间倒序
+    deleted.sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
+    return deleted;
+}
+
 
         // 登录
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -1168,6 +1195,54 @@ function generateCaption(type, location, price, area, bedrooms, bathrooms) {
                 const card = createListingCard(listing);
                 recentContainer.appendChild(card);
             });
+            async function updateDashboard() {
+    document.getElementById('totalListings').textContent = listings.length;
+    document.getElementById('myListings').textContent = listings.filter(l => l.user === currentUser).length;
+    const uniqueUsers = new Set(listings.map(l => l.user)).size;
+    document.getElementById('teamMembers').textContent = uniqueUsers;
+    const thisMonth = listings.filter(l => new Date(l.date).getMonth() === new Date().getMonth()).length;
+    document.getElementById('thisMonth').textContent = thisMonth;
+
+    const recentContainer = document.getElementById('recentListings');
+    recentContainer.innerHTML = '';
+    listings.slice(0, 6).forEach(listing => {
+        const card = createListingCard(listing);
+        recentContainer.appendChild(card);
+    });
+
+    // === 新增：最近 7 天删除的房源列表 ===
+    const recentDeletedDiv = document.getElementById('recentDeleted');
+    if (recentDeletedDiv) {
+        recentDeletedDiv.innerHTML = '加载中...';
+        try {
+            const deleted = await loadDeletedListingsLast7Days();
+            if (!deleted.length) {
+                recentDeletedDiv.textContent = '最近 7 天没有删除记录。';
+            } else {
+                recentDeletedDiv.innerHTML = deleted.map(item => {
+                    const delDate = item.deletedAt
+                        ? new Date(item.deletedAt).toLocaleString('zh-CN')
+                        : '-';
+                    const priceText = item.price ? 'RM ' + Number(item.price).toLocaleString() : '-';
+                    return `
+                        <div style="padding: 6px 0; border-bottom: 1px solid #eee;">
+                            <div><strong>${item.type || ''} - ${item.location || ''}</strong></div>
+                            <div>价格：${priceText}</div>
+                            <div>地址：${item.address || '-'}</div>
+                            <div>发布者：${item.user || '-'}</div>
+                            <div>删除人：${item.deletedBy || '-'}</div>
+                            <div>删除时间：${delDate}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (e) {
+            console.error(e);
+            recentDeletedDiv.textContent = '读取删除记录失败。';
+        }
+    }
+}
+
         }
 
         function createListingCard(listing) {
