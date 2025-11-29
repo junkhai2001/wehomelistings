@@ -1194,19 +1194,23 @@ recentDeletedDiv.innerHTML = deleted.map(item => {
         ? new Date(item.deletedAt).toLocaleString('zh-CN')
         : '-';
     const priceText = item.price ? 'RM ' + Number(item.price).toLocaleString() : '-';
+    const isOwner = item.user === currentUser;
+
     return `
         <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
                 <div>
                     <div><strong>${item.type || ''} - ${item.location || ''}</strong></div>
                     <div style="font-size: 12px; color: #7f8c8d;">价格：${priceText} | 地址：${item.address || '-'}</div>
                     <div style="font-size: 12px; color: #7f8c8d;">发布者：${item.user || '-'} | 删除人：${item.deletedBy || '-'}</div>
                     <div style="font-size: 11px; color: #95a5a6;">删除时间：${delDate}</div>
                 </div>
-                <button
-                    class="btn btn-small btn-secondary"
-                    onclick="restoreListing('${item.id}')"
-                >🔄 恢复</button>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    ${isOwner ? `
+                        <button class="btn btn-small btn-secondary" onclick="restoreListing('${item.id}')">🔄 恢复</button>
+                    ` : ''}
+                    <button class="btn btn-small btn-danger" onclick="permanentlyDeleteListing('${item.id}')">🗑 彻底删除</button>
+                </div>
             </div>
         </div>
     `;
@@ -1480,6 +1484,25 @@ async function restoreListing(id) {
         alert('恢复失败：' + err.message);
     }
 }
+        // 从 deleted_listings 中彻底删除（不可恢复）
+async function permanentlyDeleteListing(id) {
+    if (!confirm('确定要【彻底删除】这条记录吗？此操作不可恢复！')) return;
+
+    try {
+        const { db, deleteDoc, doc } = window._firestore;
+
+        await deleteDoc(doc(db, "deleted_listings", id));
+
+        // 只需要刷新仪表盘列表即可
+        await updateDashboard();
+
+        alert('已从删除记录中彻底删除。');
+    } catch (err) {
+        console.error(err);
+        alert('彻底删除失败：' + err.message);
+    }
+}
+
 
 
 
