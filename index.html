@@ -757,7 +757,7 @@
 
                         <div class="form-row full">
                             <div class="form-group">
-                                <label>上传照片，请依据排版上传，例：外观-客厅-厨房-房间-厕所-Facilities (最多10张) *</label>
+                                <label>上传照片，请依据排版顺序上传，例：外观-客厅-厨房-房间-厕所-Facilities (最多20张) *</label>
                                 <div class="image-upload" id="imageUpload">
                                     <p>点击或拖拽图片到这里上传</p>
                                     <input type="file" id="imageInput" multiple accept="image/*">
@@ -971,8 +971,8 @@ document.getElementById('imageInput').addEventListener('change', function() {
 });
 
 function handleImages(files) {
-    if (uploadedImages.length + files.length > 10) {
-        alert('最多只能上传10张图片');
+    if (uploadedImages.length + files.length > 20) {
+        alert('最多只能上传20张图片');
         return;
     }
 
