@@ -605,12 +605,13 @@
                     <h2>最近上传的房源</h2>
                     <div id="recentListings" class="listing-grid"></div>
                 </div>
-                <div class="card">
+<div class="card">
     <h2>最近 7 天删除的房源</h2>
     <div id="recentDeleted" style="font-size: 14px; line-height: 1.6;">
         <!-- 动态生成 -->
     </div>
 </div>
+
 
             </div>
 
@@ -830,32 +831,34 @@
     </div>
 
     <script>
-        let users = {
-            admin: { password: '123456', role: 'admin' },
-            looannshen: { password: '123456', role: 'agent' },
-            tanchunkiat: { password: '123456', role: 'agent' },
-            wongmingli: { password: '123456', role: 'agent' },
-            gohjunkhai: { password: '123456', role: 'agent' }
-        };
+let users = {
+    admin: { password: '123456', role: 'admin' },
+    looannshen: { password: '123456', role: 'agent' },
+    tanchunkiat: { password: '123456', role: 'agent' },
+    wongmingli: { password: '123456', role: 'agent' },
+    gohjunkhai: { password: '123456', role: 'agent' }
+};
 
-        let listings = [];
-        let currentUser = null;
-        let uploadedImages = [];
-        let uploadedFiles = [];
+let listings = [];
+let currentUser = null;
+let uploadedImages = [];
+let uploadedFiles = [];
 
-        // 从 Firestore 拉取房源
-        async function loadListingsFromFirestore() {
-            const { db, collection, getDocs, query, orderBy } = window._firestore;
-            const q = query(collection(db, "listings"), orderBy("date", "desc"));
-            const snap = await getDocs(q);
-            listings = [];
-            snap.forEach(docSnap => {
-                listings.push({
-                    id: docSnap.id,
-                    ...docSnap.data()
-                });
-            });
-            // 读取最近 7 天删除的房源
+// 从 Firestore 拉取房源
+async function loadListingsFromFirestore() {
+    const { db, collection, getDocs, query, orderBy } = window._firestore;
+    const q = query(collection(db, "listings"), orderBy("date", "desc"));
+    const snap = await getDocs(q);
+    listings = [];
+    snap.forEach(docSnap => {
+        listings.push({
+            id: docSnap.id,
+            ...docSnap.data()
+        });
+    });
+}
+
+// 读取最近 7 天删除的房源
 async function loadDeletedListingsLast7Days() {
     const { db, collection, getDocs } = window._firestore;
     const deletedCol = collection(db, "deleted_listings");
@@ -882,154 +885,151 @@ async function loadDeletedListingsLast7Days() {
     return deleted;
 }
 
+// 登录
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (users[username] && users[username].password === password) {
+        currentUser = username;
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('mainApp').classList.add('active');
+        document.getElementById('currentUser').textContent = username;
+        document.getElementById('settingsUsername').value = username;
+        
+        await loadListingsFromFirestore();
+        updateDashboard();
+        refreshListings();
+        refreshMyListings();
+        startClock();
+    } else {
+        alert('用户名或密码错误！');
+    }
+});
+
+// 登出
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    if (confirm('确定要登出吗？')) {
+        currentUser = null;
+        document.getElementById('mainApp').classList.remove('active');
+        document.getElementById('loginPage').style.display = 'flex';
+        document.getElementById('loginForm').reset();
+    }
+});
+
+// 菜单导航
+document.querySelectorAll('.menu-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const section = this.dataset.section;
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(section).classList.add('active');
+        document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+
+        if (section === 'listings') refreshListings();
+        if (section === 'my-listings') refreshMyListings();
+    });
+});
+
+// 时钟
+function startClock() {
+    function updateTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+}
+
+// 图片上传处理
+document.getElementById('imageUpload').addEventListener('click', function() {
+    document.getElementById('imageInput').click();
+});
+
+document.getElementById('imageUpload').addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.style.backgroundColor = 'rgba(52, 152, 219, 0.1)';
+});
+
+document.getElementById('imageUpload').addEventListener('dragleave', function() {
+    this.style.backgroundColor = '';
+});
+
+document.getElementById('imageUpload').addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.style.backgroundColor = '';
+    handleImages(e.dataTransfer.files);
+});
+
+document.getElementById('imageInput').addEventListener('change', function() {
+    handleImages(this.files);
+});
+
+function handleImages(files) {
+    if (uploadedImages.length + files.length > 10) {
+        alert('最多只能上传10张图片');
+        return;
+    }
+
+    for (let file of files) {
+        if (file.type.startsWith('image/')) {
+            uploadedFiles.push(file);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImages.push(e.target.result);
+                displayImagePreviews();
+            };
+            reader.readAsDataURL(file);
         }
+    }
+}
 
+function displayImagePreviews() {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    uploadedImages.forEach((img, index) => {
+        const item = document.createElement('div');
+        item.className = 'image-item';
+        item.innerHTML = `
+            <img src="${img}" alt="preview">
+            <button class="remove-btn" type="button" data-index="${index}">×</button>
+        `;
+        preview.appendChild(item);
+    });
 
-        // 登录
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (users[username] && users[username].password === password) {
-                currentUser = username;
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('mainApp').classList.add('active');
-                document.getElementById('currentUser').textContent = username;
-                document.getElementById('settingsUsername').value = username;
-                
-                await loadListingsFromFirestore();
-                updateDashboard();
-                refreshListings();
-                refreshMyListings();
-                startClock();
-            } else {
-                alert('用户名或密码错误！');
-            }
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const index = parseInt(this.dataset.index);
+            uploadedImages.splice(index, 1);
+            uploadedFiles.splice(index, 1);
+            displayImagePreviews();
         });
+    });
+}
 
-        // 登出
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            if (confirm('确定要登出吗？')) {
-                currentUser = null;
-                document.getElementById('mainApp').classList.remove('active');
-                document.getElementById('loginPage').style.display = 'flex';
-                document.getElementById('loginForm').reset();
-            }
-        });
+// 文案生成
+document.getElementById('generateCaption').addEventListener('click', function(e) {
+    e.preventDefault();
+    const type = document.getElementById('propertyType').value;
+    const location = document.getElementById('location').value;
+    const price = document.getElementById('price').value;
+    const area = document.getElementById('area').value;
+    const bedrooms = document.getElementById('bedrooms').value;
+    const bathrooms = document.getElementById('bathrooms').value;
 
-        // 菜单导航
-        document.querySelectorAll('.menu-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const section = this.dataset.section;
-                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                document.getElementById(section).classList.add('active');
-                document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
+    if (!type || !location || !price || !area) {
+        alert('请先填写房产类型、位置、价格和面积');
+        return;
+    }
 
-                if (section === 'listings') refreshListings();
-                if (section === 'my-listings') refreshMyListings();
-            });
-        });
-
-        // 时钟
-        function startClock() {
-            function updateTime() {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
-            }
-            updateTime();
-            setInterval(updateTime, 1000);
-        }
-
-        // 图片上传处理
-        document.getElementById('imageUpload').addEventListener('click', function() {
-            document.getElementById('imageInput').click();
-        });
-
-        document.getElementById('imageUpload').addEventListener('dragover', function(e) {
-            e.preventDefault();
-            this.style.backgroundColor = 'rgba(52, 152, 219, 0.1)';
-        });
-
-        document.getElementById('imageUpload').addEventListener('dragleave', function() {
-            this.style.backgroundColor = '';
-        });
-
-        document.getElementById('imageUpload').addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.style.backgroundColor = '';
-            handleImages(e.dataTransfer.files);
-        });
-
-        document.getElementById('imageInput').addEventListener('change', function() {
-            handleImages(this.files);
-        });
-
-        function handleImages(files) {
-            if (uploadedImages.length + files.length > 10) {
-                alert('最多只能上传10张图片');
-                return;
-            }
-
-            for (let file of files) {
-                if (file.type.startsWith('image/')) {
-                    uploadedFiles.push(file);
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        uploadedImages.push(e.target.result);
-                        displayImagePreviews();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
-        }
-
-        function displayImagePreviews() {
-            const preview = document.getElementById('imagePreview');
-            preview.innerHTML = '';
-            uploadedImages.forEach((img, index) => {
-                const item = document.createElement('div');
-                item.className = 'image-item';
-                item.innerHTML = `
-                    <img src="${img}" alt="preview">
-                    <button class="remove-btn" type="button" data-index="${index}">×</button>
-                `;
-                preview.appendChild(item);
-            });
-
-            document.querySelectorAll('.remove-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.dataset.index);
-                    uploadedImages.splice(index, 1);
-                    uploadedFiles.splice(index, 1);
-                    displayImagePreviews();
-                });
-            });
-        }
-
-        // 文案生成
-        document.getElementById('generateCaption').addEventListener('click', function(e) {
-            e.preventDefault();
-            const type = document.getElementById('propertyType').value;
-            const location = document.getElementById('location').value;
-            const price = document.getElementById('price').value;
-            const area = document.getElementById('area').value;
-            const bedrooms = document.getElementById('bedrooms').value;
-            const bathrooms = document.getElementById('bathrooms').value;
-
-            if (!type || !location || !price || !area) {
-                alert('请先填写房产类型、位置、价格和面积');
-                return;
-            }
-
-            const caption = generateCaption(type, location, price, area, bedrooms, bathrooms);
-            document.getElementById('generatedCaption').innerHTML = `<div class="generated-caption">${caption}</div>`;
-        });
+    const caption = generateCaption(type, location, price, area, bedrooms, bathrooms);
+    document.getElementById('generatedCaption').innerHTML = `<div class="generated-caption">${caption}</div>`;
+});
 
 function generateCaption(type, location, price, area, bedrooms, bathrooms) {
     const furnished = document.getElementById('furnished').value || '';
@@ -1043,160 +1043,129 @@ function generateCaption(type, location, price, area, bedrooms, bathrooms) {
     const nearby4 = document.getElementById('nearby4').value || '';
 
     const priceText = parseInt(price).toLocaleString();
-
-    // 标题：去掉中括号，用家私作为前缀（有就加“Fully Furnished ”，没有就直接地点）
+    
+    // 标题：去掉中括号
     const furnishedTitle = furnished ? `${furnished} ` : '';
     const title = `${furnishedTitle}${location} – ${type} For Rent RM${priceText}`;
 
-    // House Details，用不同小图标
+    // 用不同图标
     let detailsLines = [];
     if (bedrooms) detailsLines.push(`🛏 ${bedrooms} Bedrooms`);
     if (bathrooms) detailsLines.push(`🛁 ${bathrooms} Bathrooms`);
     if (area) detailsLines.push(`📐 Size ${area} sq.ft`);
+    if (furnished) detailsLines.push(`🛋 ${furnished} Furnishing`);
     if (floor) detailsLines.push(`🏢 Floor: ${floor}`);
     if (carpark) detailsLines.push(`🚗 Car Park: ${carpark}`);
     if (direction) detailsLines.push(`🧭 Direction: ${direction}`);
-    if (furnished) detailsLines.push(`🛋 ${furnished}`);
 
-    const detailsBlock = detailsLines.length
-        ? `House Details:\n${detailsLines.join('\n')}`
-        : '';
+    const detailsBlock = detailsLines.length ? `House Details:\n${detailsLines.join('\n')}` : '';
 
-    // Nearby Access，用 📍 图标
     let nearbyLines = [];
     if (nearby1) nearbyLines.push(`📍 ${nearby1}`);
     if (nearby2) nearbyLines.push(`📍 ${nearby2}`);
     if (nearby3) nearbyLines.push(`📍 ${nearby3}`);
     if (nearby4) nearbyLines.push(`📍 ${nearby4}`);
 
-    const nearbyBlock = nearbyLines.length
-        ? `Nearby Access:\n${nearbyLines.join('\n')}`
-        : '';
+    const nearbyBlock = nearbyLines.length ? `Nearby Access:\n${nearbyLines.join('\n')}` : '';
+    const contactLine = agentName ? `☎️ Interested, please contact ${agentName}.` : `☎️ Interested, please contact for more details.`;
 
-    const contactLine = agentName
-        ? `☎️ Interested, please contact ${agentName}.`
-        : `☎️ Interested, please contact for more details.`;
-
-    return [
-        title,
-        '',
-        detailsBlock,
-        '',
-        nearbyBlock,
-        '',
-        contactLine
-    ].filter(Boolean).join('\n');
+    return [title, '', detailsBlock, '', nearbyBlock, '', contactLine].filter(Boolean).join('\n');
 }
 
+// 复制文案
+document.getElementById('copyCaption').addEventListener('click', async function() {
+    const text = document.getElementById('generatedCaption').innerText.trim();
+    if (!text) {
+        alert('没有可以复制的文案');
+        return;
+    }
 
-        // 复制文案
-        document.getElementById('copyCaption').addEventListener('click', async function() {
-            const text = document.getElementById('generatedCaption').innerText.trim();
-            if (!text) {
-                alert('没有可以复制的文案');
-                return;
-            }
+    try {
+        await navigator.clipboard.writeText(text);
+        alert('文案已复制');
+    } catch (err) {
+        alert('复制失败，请手动选中文案复制');
+    }
+});
 
-            try {
-                await navigator.clipboard.writeText(text);
-                alert('文案已复制');
-            } catch (err) {
-                alert('复制失败，请手动选中文案复制');
-            }
-        });
+// 上传表单提交
+async function uploadImagesToStorage(files, listingId) {
+    const { storage, ref, uploadBytes, getDownloadURL } = window._storage;
+    const urls = [];
 
-        // 上传表单提交
-        async function uploadImagesToStorage(files, listingId) {
-            const { storage, ref, uploadBytes, getDownloadURL } = window._storage;
-            const urls = [];
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const path = `listings/${listingId}/${Date.now()}_${file.name}`;
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        urls.push(url);
+    }
+    return urls;
+}
 
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const path = `listings/${listingId}/${Date.now()}_${file.name}`;
-                const storageRef = ref(storage, path);
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
-                urls.push(url);
-            }
-            return urls;
-        }
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    if (uploadedFiles.length === 0) {
+        alert('请至少上传一张图片');
+        return;
+    }
 
-            if (uploadedFiles.length === 0) {
-                alert('请至少上传一张图片');
-                return;
-            }
+    const baseData = {
+        user: currentUser,
+        type: document.getElementById('propertyType').value,
+        location: document.getElementById('location').value,
+        price: parseInt(document.getElementById('price').value),
+        area: document.getElementById('area').value,
+        bedrooms: parseInt(document.getElementById('bedrooms').value),
+        bathrooms: parseInt(document.getElementById('bathrooms').value),
+        floor: document.getElementById('floor').value,
+        carpark: document.getElementById('carpark').value,
+        direction: document.getElementById('direction').value,
+        furnished: document.getElementById('furnished').value,
+        securityDeposit: document.getElementById('securityDeposit').value,
+        utilitiesDeposit: document.getElementById('utilitiesDeposit').value,
+        otherDeposit: document.getElementById('otherDeposit').value,
+        remarks: document.getElementById('remarks').value,
+        agentName: document.getElementById('agentName').value,
+        address: document.getElementById('address').value,
+        nearby1: document.getElementById('nearby1').value,
+        nearby2: document.getElementById('nearby2').value,
+        nearby3: document.getElementById('nearby3').value,
+        nearby4: document.getElementById('nearby4').value,
+        caption: document.getElementById('generatedCaption').textContent,
+        date: new Date().toISOString()
+    };
 
-            const baseData = {
-                user: currentUser,
-                type: document.getElementById('propertyType').value,
-                location: document.getElementById('location').value,
-                price: parseInt(document.getElementById('price').value),
-                area: document.getElementById('area').value,
-                bedrooms: parseInt(document.getElementById('bedrooms').value),
-                bathrooms: parseInt(document.getElementById('bathrooms').value),
-                floor: document.getElementById('floor').value,
-                carpark: document.getElementById('carpark').value,
-                direction: document.getElementById('direction').value,
-                furnished: document.getElementById('furnished').value,
-                securityDeposit: document.getElementById('securityDeposit').value,
-                utilitiesDeposit: document.getElementById('utilitiesDeposit').value,
-                otherDeposit: document.getElementById('otherDeposit').value,
-                remarks: document.getElementById('remarks').value,
-                agentName: document.getElementById('agentName').value,
-                address: document.getElementById('address').value,
-                nearby1: document.getElementById('nearby1').value,
-                nearby2: document.getElementById('nearby2').value,
-                nearby3: document.getElementById('nearby3').value,
-                nearby4: document.getElementById('nearby4').value,
-                caption: document.getElementById('generatedCaption').textContent,
-                date: new Date().toISOString()
-            };
+    try {
+        const { db, collection, doc, setDoc } = window._firestore;
+        const listingsCol = collection(db, "listings");
+        const newDocRef = doc(listingsCol);
 
-            try {
-                const { db, collection, doc, setDoc } = window._firestore;
-                const listingsCol = collection(db, "listings");
-                const newDocRef = doc(listingsCol);
+        await setDoc(newDocRef, { ...baseData, images: [] });
+        const imageUrls = await uploadImagesToStorage(uploadedFiles, newDocRef.id);
+        await setDoc(newDocRef, { ...baseData, images: imageUrls }, { merge: true });
 
-                await setDoc(newDocRef, { ...baseData, images: [] });
-                const imageUrls = await uploadImagesToStorage(uploadedFiles, newDocRef.id);
-                await setDoc(newDocRef, { ...baseData, images: imageUrls }, { merge: true });
+        alert('房源发布成功！');
+        document.getElementById('uploadForm').reset();
+        uploadedImages = [];
+        uploadedFiles = [];
+        document.getElementById('imagePreview').innerHTML = '';
+        document.getElementById('generatedCaption').innerHTML = '';
 
-                alert('房源发布成功！');
-                document.getElementById('uploadForm').reset();
-                uploadedImages = [];
-                uploadedFiles = [];
-                document.getElementById('imagePreview').innerHTML = '';
-                document.getElementById('generatedCaption').innerHTML = '';
+        await loadListingsFromFirestore();
+        updateDashboard();
+        refreshListings();
+        refreshMyListings();
+    } catch (err) {
+        console.error(err);
+        alert('房源发布失败，请稍后再试');
+    }
+});
 
-                await loadListingsFromFirestore();
-                updateDashboard();
-                refreshListings();
-                refreshMyListings();
-            } catch (err) {
-                console.error(err);
-                alert('房源发布失败，请稍后再试');
-            }
-        });
-
-        // 仪表板
-        function updateDashboard() {
-            document.getElementById('totalListings').textContent = listings.length;
-            document.getElementById('myListings').textContent = listings.filter(l => l.user === currentUser).length;
-            const uniqueUsers = new Set(listings.map(l => l.user)).size;
-            document.getElementById('teamMembers').textContent = uniqueUsers;
-            const thisMonth = listings.filter(l => new Date(l.date).getMonth() === new Date().getMonth()).length;
-            document.getElementById('thisMonth').textContent = thisMonth;
-
-            const recentContainer = document.getElementById('recentListings');
-            recentContainer.innerHTML = '';
-            listings.slice(0, 6).forEach(listing => {
-                const card = createListingCard(listing);
-                recentContainer.appendChild(card);
-            });
-            async function updateDashboard() {
+// 仪表板 - 更新统计数据 + 最近删除列表
+async function updateDashboard() {
     document.getElementById('totalListings').textContent = listings.length;
     document.getElementById('myListings').textContent = listings.filter(l => l.user === currentUser).length;
     const uniqueUsers = new Set(listings.map(l => l.user)).size;
@@ -1211,7 +1180,7 @@ function generateCaption(type, location, price, area, bedrooms, bathrooms) {
         recentContainer.appendChild(card);
     });
 
-    // === 新增：最近 7 天删除的房源列表 ===
+    // === 最近 7 天删除的房源列表 ===
     const recentDeletedDiv = document.getElementById('recentDeleted');
     if (recentDeletedDiv) {
         recentDeletedDiv.innerHTML = '加载中...';
@@ -1226,55 +1195,51 @@ function generateCaption(type, location, price, area, bedrooms, bathrooms) {
                         : '-';
                     const priceText = item.price ? 'RM ' + Number(item.price).toLocaleString() : '-';
                     return `
-                        <div style="padding: 6px 0; border-bottom: 1px solid #eee;">
+                        <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
                             <div><strong>${item.type || ''} - ${item.location || ''}</strong></div>
-                            <div>价格：${priceText}</div>
-                            <div>地址：${item.address || '-'}</div>
-                            <div>发布者：${item.user || '-'}</div>
-                            <div>删除人：${item.deletedBy || '-'}</div>
-                            <div>删除时间：${delDate}</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">价格：${priceText} | 地址：${item.address || '-'}</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">发布者：${item.user || '-'} | 删除人：${item.deletedBy || '-'}</div>
+                            <div style="font-size: 11px; color: #95a5a6;">删除时间：${delDate}</div>
                         </div>
                     `;
                 }).join('');
             }
         } catch (e) {
-            console.error(e);
+            console.error('读取删除记录失败:', e);
             recentDeletedDiv.textContent = '读取删除记录失败。';
         }
     }
 }
 
-        }
+function createListingCard(listing) {
+    const card = document.createElement('div');
+    card.className = 'listing-card';
+    card.dataset.listingId = listing.id;
+    card.innerHTML = `
+        <div class="listing-card-image">
+            ${listing.images && listing.images[0] ? `<img src="${listing.images[0]}" alt="${listing.type}">` : '<span>暂无图片</span>'}
+        </div>
+        <div class="listing-card-content">
+            <div class="listing-card-title">${listing.type} - ${listing.location}</div>
+            <div class="listing-card-price">RM ${listing.price.toLocaleString()}</div>
+            <div class="listing-card-info">
+                <p>${listing.bedrooms}房 ${listing.bathrooms}厕 | ${listing.area} sq.ft</p>
+                <p>发布者：${listing.user}</p>
+            </div>
+            <div class="listing-card-actions">
+                <button class="btn btn-small btn-primary view-btn">查看详情</button>
+                ${listing.user === currentUser ? `<button class="btn btn-small btn-danger delete-btn">删除</button>` : ''}
+            </div>
+        </div>
+    `;
 
-        function createListingCard(listing) {
-            const card = document.createElement('div');
-            card.className = 'listing-card';
-            card.dataset.listingId = listing.id;
-            card.innerHTML = `
-                <div class="listing-card-image">
-                    ${listing.images && listing.images[0] ? `<img src="${listing.images[0]}" alt="${listing.type}">` : '<span>暂无图片</span>'}
-                </div>
-                <div class="listing-card-content">
-                    <div class="listing-card-title">${listing.type} - ${listing.location}</div>
-                    <div class="listing-card-price">RM ${listing.price.toLocaleString()}</div>
-                    <div class="listing-card-info">
-                        <p>${listing.bedrooms}房 ${listing.bathrooms}厕 | ${listing.area} sq.ft</p>
-                        <p>发布者：${listing.user}</p>
-                    </div>
-                    <div class="listing-card-actions">
-                        <button class="btn btn-small btn-primary view-btn">查看详情</button>
-                        ${listing.user === currentUser ? `<button class="btn btn-small btn-danger delete-btn">删除</button>` : ''}
-                    </div>
-                </div>
-            `;
+    card.querySelector('.view-btn').addEventListener('click', () => viewListing(listing.id));
+    if (listing.user === currentUser) {
+        card.querySelector('.delete-btn').addEventListener('click', () => deleteListing(listing.id));
+    }
 
-            card.querySelector('.view-btn').addEventListener('click', () => viewListing(listing.id));
-            if (listing.user === currentUser) {
-                card.querySelector('.delete-btn').addEventListener('click', () => deleteListing(listing.id));
-            }
-
-            return card;
-        }
+    return card;
+}
 
 function viewListing(id) {
     const listing = listings.find(l => l.id === id);
@@ -1283,25 +1248,16 @@ function viewListing(id) {
     const modal = document.getElementById('listingModal');
     const modalContent = document.getElementById('modalContent');
 
-    // 大图 + 可切换小图
     let galleryHTML = '';
     if (listing.images && listing.images.length > 0) {
         galleryHTML = `
             <img src="${listing.images[0]}" class="listing-detail-image" id="mainImage" alt="${listing.type}">
-            ${listing.images.length > 1 ? `
-                <div class="listing-detail-gallery">
-                    ${listing.images.map((img, idx) => `
-                        <img src="${img}" alt="photo ${idx + 1}" onclick="document.getElementById('mainImage').src='${img}'">
-                    `).join('')}
-                </div>
-            ` : ''}
         `;
     }
 
     modalContent.innerHTML = `
         <h2 style="margin-bottom: 20px;">${listing.type} - ${listing.location}</h2>
         ${galleryHTML}
-
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
             <div>
                 <p><strong style="color: #27ae60; font-size: 18px;">RM ${listing.price.toLocaleString()}</strong></p>
@@ -1354,7 +1310,6 @@ function viewListing(id) {
         </div>
     `;
 
-    // 按钮事件
     modalContent.querySelector('.copy-caption-btn')
         .addEventListener('click', () => copyListingCaption(listing.id));
     modalContent.querySelector('.download-images-btn')
@@ -1365,21 +1320,20 @@ function viewListing(id) {
     modal.classList.add('active');
 }
 
+function copyListingCaption(id) {
+    const listing = listings.find(l => l.id === id);
+    if (!listing || !listing.caption) {
+        alert('没有可复制的文案');
+        return;
+    }
 
-        function copyListingCaption(id) {
-            const listing = listings.find(l => l.id === id);
-            if (!listing || !listing.caption) {
-                alert('没有可复制的文案');
-                return;
-            }
-
-            navigator.clipboard.writeText(listing.caption).then(() => {
-                alert('文案已复制！');
-            }).catch(err => {
-                console.error(err);
-                alert('复制失败');
-            });
-        }
+    navigator.clipboard.writeText(listing.caption).then(() => {
+        alert('文案已复制！');
+    }).catch(err => {
+        console.error(err);
+        alert('复制失败');
+    });
+}
 
 function downloadImages(id) {
     const listing = listings.find(l => l.id === id);
@@ -1390,47 +1344,23 @@ function downloadImages(id) {
 
     const total = listing.images.length;
     let success = 0;
-    let fail = 0;
 
-    // 逐张用 fetch + blob 下载，再用隐藏 a 标签触发保存
     listing.images.forEach((img, idx) => {
-        // Firebase Storage 的直接文件地址（你现在的 URL 已经带 alt=media 就不用再拼）
-        const imageUrl = img;
-
-        fetch(imageUrl)
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error('HTTP ' + res.status);
-                }
-                return res.blob();
-            })
-            .then(blob => {
-                const blobUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = `${listing.location || 'image'}_${idx + 1}.jpg`;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(blobUrl);
-                success++;
-            })
-            .catch(err => {
-                console.error('下载失败', idx + 1, err);
-                fail++;
-            })
-            .finally(() => {
-                if (success + fail === total) {
-                    alert(`下载完成：成功 ${success} 张，失败 ${fail} 张`);
-                }
-            });
+        const a = document.createElement('a');
+        a.href = img;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        success++;
     });
 
-    alert('已经开始为你准备下载图片，请稍等几秒...');
+    alert(`已为你打开 ${total} 个图片标签，可以在浏览器里另存为。`);
 }
 
-
+// 软删除：先写到 deleted_listings，再从 listings 删除
 async function deleteListing(id) {
     if (!confirm('确定要删除这条房源吗？')) return;
 
@@ -1442,58 +1372,57 @@ async function deleteListing(id) {
             return;
         }
 
-        // 1）先把要删的房源，连同删除时间，写到 deleted_listings 里
+        // 1) 先写入 deleted_listings
         const deletedCol = collection(db, "deleted_listings");
-        const deletedDocRef = doc(deletedCol, id); // 用同一个 id 存
+        const deletedDocRef = doc(deletedCol, id);
         await setDoc(deletedDocRef, {
             ...listing,
             deletedAt: new Date().toISOString(),
             deletedBy: currentUser
         });
 
-        // 2）再从 listings 正式删除
+        // 2) 再从 listings 正式删除
         await deleteDoc(doc(db, "listings", id));
 
-        // 3）刷新本地数据
+        // 3) 刷新本地数据
         await loadListingsFromFirestore();
         updateDashboard();
         refreshListings();
         refreshMyListings();
-        alert('删除成功！该房源已记录到“删除记录”里。');
+        alert('删除成功！该房源已记录到"删除记录"里。');
 
     } catch (err) {
         console.error(err);
-        alert('删除失败');
+        alert('删除失败: ' + err.message);
     }
 }
 
+function refreshListings() {
+    const container = document.getElementById('listingsContainer');
+    container.innerHTML = '';
+    listings.forEach(listing => {
+        container.appendChild(createListingCard(listing));
+    });
+}
 
-        function refreshListings() {
-            const container = document.getElementById('listingsContainer');
-            container.innerHTML = '';
-            listings.forEach(listing => {
-                container.appendChild(createListingCard(listing));
-            });
-        }
+function refreshMyListings() {
+    const container = document.getElementById('myListingsContainer');
+    container.innerHTML = '';
+    listings.filter(l => l.user === currentUser).forEach(listing => {
+        container.appendChild(createListingCard(listing));
+    });
+}
 
-        function refreshMyListings() {
-            const container = document.getElementById('myListingsContainer');
-            container.innerHTML = '';
-            listings.filter(l => l.user === currentUser).forEach(listing => {
-                container.appendChild(createListingCard(listing));
-            });
-        }
+// 关闭模态框
+document.getElementById('closeModal').addEventListener('click', function() {
+    document.getElementById('listingModal').classList.remove('active');
+});
 
-        // 关闭模态框
-        document.getElementById('closeModal').addEventListener('click', function() {
-            document.getElementById('listingModal').classList.remove('active');
-        });
-
-        document.getElementById('listingModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('active');
-            }
-        });
+document.getElementById('listingModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.remove('active');
+    }
+});
     </script>
 </body>
 
