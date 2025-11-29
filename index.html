@@ -978,23 +978,25 @@
         // 发送验证码按钮
         const sendCodeBtn = document.getElementById('sendCodeBtn');
         if (sendCodeBtn) {
-            sendCodeBtn.addEventListener('click', async () => {
-                const phoneNumberInput = document.getElementById('phoneNumber');
-                const phoneNumber = phoneNumberInput.value.trim();
-                if (!phoneNumber) {
-                    alert('请输入手机号码（包括国家区号，例如 +60）');
-                    return;
-                }
+           sendCodeBtn.addEventListener('click', async () => {
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const phoneNumber = phoneNumberInput.value.trim();
 
-                try {
-                    const appVerifier = window.recaptchaVerifier;
-                    window.confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-                    alert('验证码已发送，请检查手机短信');
-                } catch (error) {
-                    console.error(error);
-                    alert('发送验证码失败：' + (error.message || '请稍后再试'));
-                }
-            });
+    // 简单格式检查：必须以 + 开头，长度至少 8
+    if (!phoneNumber.startsWith('+') || phoneNumber.length < 8) {
+        alert('请输入正确的手机号码格式，例如：+60123456789');
+        return;
+    }
+
+    try {
+        const appVerifier = window.recaptchaVerifier;
+        window.confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+        alert('验证码已发送，请检查手机短信');
+    } catch (error) {
+        console.error(error);
+        alert('发送验证码失败：' + (error.message || '请稍后再试'));
+    }
+});
         }
 
         // 确认验证码按钮
