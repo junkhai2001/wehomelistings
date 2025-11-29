@@ -1189,20 +1189,29 @@ async function updateDashboard() {
             if (!deleted.length) {
                 recentDeletedDiv.textContent = '最近 7 天没有删除记录。';
             } else {
-                recentDeletedDiv.innerHTML = deleted.map(item => {
-                    const delDate = item.deletedAt
-                        ? new Date(item.deletedAt).toLocaleString('zh-CN')
-                        : '-';
-                    const priceText = item.price ? 'RM ' + Number(item.price).toLocaleString() : '-';
-                    return `
-                        <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                            <div><strong>${item.type || ''} - ${item.location || ''}</strong></div>
-                            <div style="font-size: 12px; color: #7f8c8d;">价格：${priceText} | 地址：${item.address || '-'}</div>
-                            <div style="font-size: 12px; color: #7f8c8d;">发布者：${item.user || '-'} | 删除人：${item.deletedBy || '-'}</div>
-                            <div style="font-size: 11px; color: #95a5a6;">删除时间：${delDate}</div>
-                        </div>
-                    `;
-                }).join('');
+recentDeletedDiv.innerHTML = deleted.map(item => {
+    const delDate = item.deletedAt
+        ? new Date(item.deletedAt).toLocaleString('zh-CN')
+        : '-';
+    const priceText = item.price ? 'RM ' + Number(item.price).toLocaleString() : '-';
+    return `
+        <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <div>
+                    <div><strong>${item.type || ''} - ${item.location || ''}</strong></div>
+                    <div style="font-size: 12px; color: #7f8c8d;">价格：${priceText} | 地址：${item.address || '-'}</div>
+                    <div style="font-size: 12px; color: #7f8c8d;">发布者：${item.user || '-'} | 删除人：${item.deletedBy || '-'}</div>
+                    <div style="font-size: 11px; color: #95a5a6;">删除时间：${delDate}</div>
+                </div>
+                <button
+                    class="btn btn-small btn-secondary"
+                    onclick="restoreListing('${item.id}')"
+                >🔄 恢复</button>
+            </div>
+        </div>
+    `;
+}).join('');
+
             }
         } catch (e) {
             console.error('读取删除记录失败:', e);
@@ -1396,6 +1405,55 @@ async function deleteListing(id) {
         alert('删除失败: ' + err.message);
     }
 }
+        // 从 deleted_listings 恢复到 listings
+async function restoreListing(id) {
+    if (!confirm('确定要恢复这条房源吗？')) return;
+
+    try {
+        const { db, collection, doc, getDocs, setDoc, deleteDoc } = window._firestore;
+
+        // 1）从 deleted_listings 里找到这条记录
+        const deletedCol = collection(db, "deleted_listings");
+        const snap = await getDocs(deletedCol);
+        let dataToRestore = null;
+        snap.forEach(d => {
+            if (d.id === id) {
+                dataToRestore = d.data();
+            }
+        });
+        if (!dataToRestore) {
+            alert('未找到要恢复的记录');
+            return;
+        }
+
+        // 删除时多加的 deletedAt / deletedBy 不需要再写回
+        const {
+            deletedAt,
+            deletedBy,
+            ...listingData
+        } = dataToRestore;
+
+        // 2）写回 listings（用同一个 id）
+        const listingsCol = collection(db, "listings");
+        const listingDocRef = doc(listingsCol, id);
+        await setDoc(listingDocRef, listingData);
+
+        // 3）从 deleted_listings 删除这条记录
+        await deleteDoc(doc(db, "deleted_listings", id));
+
+        // 4）刷新本地
+        await loadListingsFromFirestore();
+        await updateDashboard();
+        refreshListings();
+        refreshMyListings();
+
+        alert('恢复成功！该房源已回到房源库。');
+    } catch (err) {
+        console.error(err);
+        alert('恢复失败：' + err.message);
+    }
+}
+
 
 function refreshListings() {
     const container = document.getElementById('listingsContainer');
