@@ -511,7 +511,7 @@
     <script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764346975285&amp;type=content-script&amp;dmn=ppl-ai-code-interpreter-files.s3.amazonaws.com&amp;url=https%3A%2F%2Fppl-ai-code-interpreter-files.s3.amazonaws.com%2Fweb%2Fdirect-files%2F570057e7b393865b2e4de6d99b8b20c9%2F5f0d8a6d-54ce-4661-b2ef-61877941f1e6%2F94012b36.html%3Fresponse-content-disposition%3Dattachment%253B%2520filename%253Dindex_fixed.html%253B%2520filename%252A%253DUTF-8%2527%2527index_fixed.html%26AWSAccessKeyId%3DASIA2F3EMEYEQES7ENEB%26Signature%3DBwVd0sPwY5wL16F68jjgUnaWvL0%253D%26x-amz-security-token%3DIQoJb3JpZ2luX2VjEPH%252F%252F%252F%252F%252F%252F%252F%252F%252F%252FwEaCXVzLWVhc3QtMSJHMEUCIQDC7k420b9uOyglbBjDcjwfjYmwpRQFgiZBMkMdAPif8gIgJ6DhdHBpAlt3k3p6Fk2anQ4hOx%252Fj3E5bmIzTtwVXJrkq%252FAQIuv%252F%252F%252F%252F%252F%252F%252F%252F%252F%252FARABGgw2OTk3NTMzMDk3MDUiDBgg2UtXc3B0AajwGSrQBJ1P9s0XPswFUyg8FfkACyvcaVoIan09OmwpSr2MBtbjcVBeIyCFCklA0tI4AqP92HnQCM7WtlP0nbo22tjgSX1jXAXrRdQjdZMJ5qZ7I%252FN0q4CKnf5iLFrX%252FgmLVBP%252Bta%252BlcABiYh%252FGDoahw2Yqay6JFo7ymCKSX4vO9R99WIgkdqd2u%252By9QmeRzwSj1HdpwIurei%252BwCw7k9uBnytwHKYobSjkwuX9oO%252F93WivR%252BvCBF9HhXCdXEHbGvKuq61y7npa8HBa1XAGyKpMymEBo88IurwEJTd0o8Oomn4Q730PrmeW7JeP8MH38pbZzvDVYsWkdnt7e84SfDV6oIDhSdanlkMiAkhhRfDDen3sRT5OEaM2eRATyuc18HpWyJhlpS3777v%252BHNiERmmWgYlkXrVbr3SFKKqjJ8Pm339RbqMAtIjNc40yhuIbe%252B9zX7B%252FksqWX%252FP5MQejxZF4%252B9R0A8DlSIxV8%252FnLahMddHyZ5ZedT%252F8SRG2qluIFQGrB5ztooyntqKEDhbZ7C1vcaGoWMY8vHCaYBCi%252BnRcS1vxgBo4l4GJBAvj7gaeGlqOm4LNri%252FdWOHj3mmJS55PmZseOYCU38i9Rl8Nv5BUhmC7LvquAXJckRuRi77JLyxiIWRFYFM%252FkQmfgXnb9KQ5iWtUswgkF2W7DXhK%252B%252BQpCAkQRQ97OKbHF4TvfmftLaLzmFGwSwku8sibCQkSHnAXwa51K9pV9O8qgqMFCxrT8C3B4q%252BszXw%252F90Hr2wSuBRY%252BXEZ2cjjZ2xBIuDqwcAvS2ZZc7epG4w%252F5mnyQY6mAErBzbMFe6Rso%252FaVDF1dDuEX6QHnqpZ%252BL2V8RBMDmveXlsjIsgsfwvbKjywqPMF70N1%252BdzJ7OlPV%252FXTYEs6LW%252FLVTKnOjlilT1aMNYb6xxwtMhlClfk0%252BFCrrPMVcq92BuoQSaImyja0ykVhEuem7f2WXcYW7RoAvSmOQZNgH1eOEydfYZAFyN3nR05PDUq80ykKbaxneQKkg%253D%253D%26Expires%3D1764349700&amp;app=comet.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-dnt"></script><script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764346975285&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script><script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { 
-            getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc 
+            getFirestore, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, runTransaction 
         } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { 
             getStorage, ref, uploadBytes, getDownloadURL 
@@ -531,7 +531,7 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        window._firestore = { db, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc };
+        window._firestore = { db, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, runTransaction };
         window._storage = { storage, ref, uploadBytes, getDownloadURL };
     </script>
 </head>
@@ -629,12 +629,25 @@
     >
 </div>
 
-                            <div class="form-group">
-                                <label>位置 @ 区域 *</label>
-                                <input type="text" id="location" placeholder="例：The Wave Residence @ Kota Laksamana" required>
-                            </div>
-                        </div>
-
+<div class="form-group">
+    <label>位置 @ 区域 *</label>
+    <input type="text" id="location" placeholder="例：The Wave Residence @ Kota Laksamana" required>
+</div>
+ 
+                <!-- ⬇️ 在这里新增这一段州属选择 ⬇️ -->
+<div class="form-row full">
+    <div class="form-group">
+        <label>所在州属 *</label>
+        <select id="state" required>
+            <option value="">-- 选择州属 --</option>
+            <option value="Melaka">Melaka</option>
+            <option value="Negeri Sembilan">Negeri Sembilan</option>
+            <option value="Others">Others State</option>
+        </select>
+    </div>
+</div>
+                        
+</div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>价格 (RM) *</label>
@@ -786,9 +799,16 @@
             <div id="listings" class="section">
                 <div class="card">
                     <h2>所有房源库</h2>
-                    <div class="search-box">
-                        <input type="text" id="searchListings" placeholder="搜索位置、类型或价格...">
-                    </div>
+<div class="search-box">
+    <input type="text" id="searchListings" placeholder="搜索位置、类型、价格或 Code...">
+    <select id="filterState" style="margin-left:8px;">
+        <option value="">全部州属</option>
+        <option value="Melaka">Melaka</option>
+        <option value="Negeri Sembilan">Negeri Sembilan</option>
+        <option value="Others">Others State</option>
+    </select>
+</div>
+
                     <div id="listingsContainer" class="listing-grid"></div>
                 </div>
             </div>
@@ -840,6 +860,31 @@ let users = {
 };
 
 let listings = [];
+        // 生成唯一的房源编号，例如 LR1001、LR1002 ...
+async function getNextListingCode() {
+    const { db, collection, doc, runTransaction } = window._firestore;
+    const countersCol = collection(db, "meta");
+    const counterRef = doc(countersCol, "listingCode");
+
+    const code = await runTransaction(db, async (tx) => {
+        const snap = await tx.get(counterRef);
+        let data = snap.data();
+
+        if (!snap.exists() || !data || typeof data.current !== 'number') {
+            // 第一次使用，从 1000 开始
+            data = { prefix: "LR", current: 1000 };
+        }
+
+        const next = data.current + 1;
+        tx.set(counterRef, { prefix: data.prefix || "LR", current: next }, { merge: true });
+
+        // LR + 四位数，例如 LR1001
+        return (data.prefix || "LR") + String(next).padStart(4, '0');
+    });
+
+    return code;
+}
+
 let currentUser = null;
 let uploadedImages = [];
 let uploadedFiles = [];
@@ -1116,6 +1161,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
         user: currentUser,
         type: document.getElementById('propertyType').value,
         location: document.getElementById('location').value,
+        state: document.getElementById('state').value,
         price: parseInt(document.getElementById('price').value),
         area: document.getElementById('area').value,
         bedrooms: parseInt(document.getElementById('bedrooms').value),
@@ -1142,6 +1188,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
         const { db, collection, doc, setDoc } = window._firestore;
         const listingsCol = collection(db, "listings");
         const newDocRef = doc(listingsCol);
+        const code = await getNextListingCode();
 
         await setDoc(newDocRef, { ...baseData, images: [] });
         const imageUrls = await uploadImagesToStorage(uploadedFiles, newDocRef.id);
@@ -1233,13 +1280,18 @@ function createListingCard(listing) {
             ${listing.images && listing.images[0] ? `<img src="${listing.images[0]}" alt="${listing.type}">` : '<span>暂无图片</span>'}
         </div>
         <div class="listing-card-content">
-            <div class="listing-card-title">${listing.type} - ${listing.location}</div>
-            <div class="listing-card-price">RM ${listing.price.toLocaleString()}</div>
-            <div class="listing-card-info">
-                <p>${listing.bedrooms}房 ${listing.bathrooms}厕 | ${listing.area} sq.ft</p>
-                <p>地址：${listing.address || '-'}</p>
-                <p>发布者：${listing.user}</p>
-            </div>
+            <div class="listing-card-title">
+    ${listing.type} - ${listing.location}
+    ${listing.code ? `<span style="font-size:12px;color:#7f8c8d;"> [${listing.code}]</span>` : ''}
+</div>
+<div class="listing-card-price">RM ${listing.price.toLocaleString()}</div>
+<div class="listing-card-info">
+    <p>${listing.bedrooms}房 ${listing.bathrooms}厕 | ${listing.area} sq.ft</p>
+    <p>州属：${listing.state || '-'}</p>
+    <p>地址：${listing.address || '-'}</p>
+    <p>发布者：${listing.user}</p>
+</div>
+
             <div class="listing-card-actions">
                 <button class="btn btn-small btn-primary view-btn">查看详情</button>
                 ${listing.user === currentUser ? `<button class="btn btn-small btn-danger delete-btn">删除</button>` : ''}
@@ -1286,6 +1338,7 @@ function viewListing(id) {
 
         <div style="margin-bottom: 20px;">
             <h3>详细资料</h3>
+            <p><strong>州属：</strong> ${listing.state || '-'}</p>
             <p><strong>楼层：</strong> ${listing.floor || '-'}</p>
             <p><strong>停车位：</strong> ${listing.carpark || '-'}</p>
             <p><strong>朝向：</strong> ${listing.direction || '-'}</p>
@@ -1525,11 +1578,32 @@ async function permanentlyDeleteListing(id) {
 
 function refreshListings() {
     const container = document.getElementById('listingsContainer');
+    const keyword = document.getElementById('searchListings').value.trim().toLowerCase();
+    const stateFilter = document.getElementById('filterState') ? document.getElementById('filterState').value : '';
+
     container.innerHTML = '';
-    listings.forEach(listing => {
-        container.appendChild(createListingCard(listing));
-    });
+
+    listings
+        .filter(l => {
+            // 关键字匹配（包含 code）
+            const text = [
+                l.location || '',
+                l.type || '',
+                String(l.price || ''),
+                l.code || ''
+            ].join(' ').toLowerCase();
+            const matchKeyword = !keyword || text.includes(keyword);
+
+            // 州属匹配
+            const matchState = !stateFilter || l.state === stateFilter;
+
+            return matchKeyword && matchState;
+        })
+        .forEach(listing => {
+            container.appendChild(createListingCard(listing));
+        });
 }
+
 
 function refreshMyListings() {
     const container = document.getElementById('myListingsContainer');
