@@ -1008,17 +1008,19 @@
             const nearby4 = document.getElementById('nearby4').value || '';
 
             const priceText = parseInt(price).toLocaleString();
-            const furnishedTitle = furnished ? furnished : 'Rental';
-            const title = `[${furnishedTitle}] ${location} – ${type} For Rent RM${priceText}`;
+            // 不要中括号，直接在前面加 Furnished 信息
+const furnishedTitle = furnished ? `${furnished} ` : '';
+const title = `${furnishedTitle}${location} – ${type} For Rent RM${priceText}`;
+
 
             let detailsLines = [];
             if (bedrooms) detailsLines.push(`• ${bedrooms} Bedrooms`);
             if (bathrooms) detailsLines.push(`• ${bathrooms} Bathrooms`);
             if (area) detailsLines.push(`• Size ${area} sq.ft`);
-            if (furnished) detailsLines.push(`• ${furnished} Furnished`);
             if (floor) detailsLines.push(`• Floor: ${floor}`);
             if (carpark) detailsLines.push(`• Car Park: ${carpark}`);
             if (direction) detailsLines.push(`• Direction: ${direction}`);
+            if (furnished) detailsLines.push(`• ${furnished}`);
 
             const detailsBlock = detailsLines.length ? `House Details:\n${detailsLines.join('\n')}` : '';
 
