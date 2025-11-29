@@ -506,6 +506,50 @@
                 grid-template-columns: 1fr;
             }
         }
+        @media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;   /* 侧边栏在上，内容在下 */
+    }
+
+    .sidebar {
+        width: 100%;
+        position: static;
+        min-height: auto;
+    }
+
+    .content {
+        margin-left: 0;
+        padding: 15px;           /* 手机边距小一点 */
+    }
+
+    .header {
+        flex-direction: column;  /* 标题和用户信息上下排 */
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr); /* 仪表板 2 列 */
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;           /* 表单一列 */
+    }
+
+    .listing-grid {
+        grid-template-columns: 1fr;           /* 房源卡片一列 */
+    }
+
+    .search-box {
+        flex-direction: column;               /* 搜索条件上下排，避免太挤 */
+        align-items: stretch;
+    }
+
+    .search-box > * {
+        width: 100%;                          /* 每个输入框下占满一行 */
+    }
+}
+
     </style>
 
     <script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764346975285&amp;type=content-script&amp;dmn=ppl-ai-code-interpreter-files.s3.amazonaws.com&amp;url=https%3A%2F%2Fppl-ai-code-interpreter-files.s3.amazonaws.com%2Fweb%2Fdirect-files%2F570057e7b393865b2e4de6d99b8b20c9%2F5f0d8a6d-54ce-4661-b2ef-61877941f1e6%2F94012b36.html%3Fresponse-content-disposition%3Dattachment%253B%2520filename%253Dindex_fixed.html%253B%2520filename%252A%253DUTF-8%2527%2527index_fixed.html%26AWSAccessKeyId%3DASIA2F3EMEYEQES7ENEB%26Signature%3DBwVd0sPwY5wL16F68jjgUnaWvL0%253D%26x-amz-security-token%3DIQoJb3JpZ2luX2VjEPH%252F%252F%252F%252F%252F%252F%252F%252F%252F%252FwEaCXVzLWVhc3QtMSJHMEUCIQDC7k420b9uOyglbBjDcjwfjYmwpRQFgiZBMkMdAPif8gIgJ6DhdHBpAlt3k3p6Fk2anQ4hOx%252Fj3E5bmIzTtwVXJrkq%252FAQIuv%252F%252F%252F%252F%252F%252F%252F%252F%252F%252FARABGgw2OTk3NTMzMDk3MDUiDBgg2UtXc3B0AajwGSrQBJ1P9s0XPswFUyg8FfkACyvcaVoIan09OmwpSr2MBtbjcVBeIyCFCklA0tI4AqP92HnQCM7WtlP0nbo22tjgSX1jXAXrRdQjdZMJ5qZ7I%252FN0q4CKnf5iLFrX%252FgmLVBP%252Bta%252BlcABiYh%252FGDoahw2Yqay6JFo7ymCKSX4vO9R99WIgkdqd2u%252By9QmeRzwSj1HdpwIurei%252BwCw7k9uBnytwHKYobSjkwuX9oO%252F93WivR%252BvCBF9HhXCdXEHbGvKuq61y7npa8HBa1XAGyKpMymEBo88IurwEJTd0o8Oomn4Q730PrmeW7JeP8MH38pbZzvDVYsWkdnt7e84SfDV6oIDhSdanlkMiAkhhRfDDen3sRT5OEaM2eRATyuc18HpWyJhlpS3777v%252BHNiERmmWgYlkXrVbr3SFKKqjJ8Pm339RbqMAtIjNc40yhuIbe%252B9zX7B%252FksqWX%252FP5MQejxZF4%252B9R0A8DlSIxV8%252FnLahMddHyZ5ZedT%252F8SRG2qluIFQGrB5ztooyntqKEDhbZ7C1vcaGoWMY8vHCaYBCi%252BnRcS1vxgBo4l4GJBAvj7gaeGlqOm4LNri%252FdWOHj3mmJS55PmZseOYCU38i9Rl8Nv5BUhmC7LvquAXJckRuRi77JLyxiIWRFYFM%252FkQmfgXnb9KQ5iWtUswgkF2W7DXhK%252B%252BQpCAkQRQ97OKbHF4TvfmftLaLzmFGwSwku8sibCQkSHnAXwa51K9pV9O8qgqMFCxrT8C3B4q%252BszXw%252F90Hr2wSuBRY%252BXEZ2cjjZ2xBIuDqwcAvS2ZZc7epG4w%252F5mnyQY6mAErBzbMFe6Rso%252FaVDF1dDuEX6QHnqpZ%252BL2V8RBMDmveXlsjIsgsfwvbKjywqPMF70N1%252BdzJ7OlPV%252FXTYEs6LW%252FLVTKnOjlilT1aMNYb6xxwtMhlClfk0%252BFCrrPMVcq92BuoQSaImyja0ykVhEuem7f2WXcYW7RoAvSmOQZNgH1eOEydfYZAFyN3nR05PDUq80ykKbaxneQKkg%253D%253D%26Expires%3D1764349700&amp;app=comet.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-dnt"></script><script type="text/javascript" nonce="995bc22bf98145a8837d2776e01" src="//local.adguard.org?ts=1764346975285&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script><script type="module">
