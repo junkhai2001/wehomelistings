@@ -600,6 +600,33 @@
                 </div>
                 <button type="submit" class="btn btn-primary">登录</button>
             </form>
+            <hr style="margin: 20px 0;">
+
+<h3 style="text-align:center; margin-bottom:10px; font-size:16px;">或使用手机号码登录</h3>
+
+<form id="phoneLoginForm">
+    <div class="form-group">
+        <label>手机号码（含区号）</label>
+        <!-- 例：+60xxx -->
+        <input type="tel" id="phoneNumber" placeholder="+60..." required>
+    </div>
+
+    <div id="recaptcha-container" style="margin-bottom: 10px;"></div>
+
+    <button type="button" id="sendCodeBtn" class="btn btn-secondary" style="margin-bottom:10px;">
+        发送验证码
+    </button>
+
+    <div class="form-group">
+        <label>短信验证码</label>
+        <input type="text" id="smsCode" placeholder="输入收到的6位验证码">
+    </div>
+
+    <button type="button" id="confirmCodeBtn" class="btn btn-primary">
+        使用手机登录
+    </button>
+</form>
+
         </div>
     </div>
 
@@ -929,6 +956,87 @@
         </div>
     </div>
 
+    <script type="module">
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged } 
+            from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+        // 复用前面初始化好的 app（你已经在上面的 script type="module" 里 initializeApp 了）
+        const auth = getAuth();
+
+        // 在手机登录表单加载后初始化 reCAPTCHA
+        window.onload = function() {
+            // 创建不可见或可见的 reCAPTCHA
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                size: 'normal',
+                callback: (response) => {
+                    // 验证通过，可以发送验证码
+                    console.log('reCAPTCHA verified');
+                }
+            });
+        };
+
+        // 发送验证码按钮
+        const sendCodeBtn = document.getElementById('sendCodeBtn');
+        if (sendCodeBtn) {
+            sendCodeBtn.addEventListener('click', async () => {
+                const phoneNumberInput = document.getElementById('phoneNumber');
+                const phoneNumber = phoneNumberInput.value.trim();
+                if (!phoneNumber) {
+                    alert('请输入手机号码（包括国家区号，例如 +60）');
+                    return;
+                }
+
+                try {
+                    const appVerifier = window.recaptchaVerifier;
+                    window.confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+                    alert('验证码已发送，请检查手机短信');
+                } catch (error) {
+                    console.error(error);
+                    alert('发送验证码失败：' + (error.message || '请稍后再试'));
+                }
+            });
+        }
+
+        // 确认验证码按钮
+        const confirmCodeBtn = document.getElementById('confirmCodeBtn');
+        if (confirmCodeBtn) {
+            confirmCodeBtn.addEventListener('click', async () => {
+                const codeInput = document.getElementById('smsCode');
+                const code = codeInput.value.trim();
+                if (!code) {
+                    alert('请输入短信验证码');
+                    return;
+                }
+
+                try {
+                    const result = await window.confirmationResult.confirm(code);
+                    const user = result.user;
+                    // user.uid 就是这个游客的唯一 ID
+                    alert('手机登录成功，欢迎！');
+
+                    // TODO：这里你可以把 user.uid 写到你现有的 currentUser 变量里，
+                    // 并且跳转到主界面（和原来用户名密码登录类似）
+                    // 例如：
+                    window._phoneLoggedInUser = user;
+                    // 后面在你的旧脚本里可以读取 window._phoneLoggedInUser
+                } catch (error) {
+                    console.error(error);
+                    alert('验证码错误或已过期，请重试');
+                }
+            });
+        }
+
+        // 可选：监听登录状态变化
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('Firebase Auth 已登录 uid:', user.uid);
+            } else {
+                console.log('Firebase Auth 已登出');
+            }
+        });
+    </script>
+
+    
     <script>
 let users = {
     admin: { password: '111111', role: 'admin' },
