@@ -860,6 +860,7 @@ let users = {
 };
 
 let listings = [];
+let editingListingId = null;   // 当前正在编辑的房源 id（null 表示新增）
         // 生成唯一的房源编号，例如 LR1001、LR1002 ...
 async function getNextListingCode() {
     const { db, collection, doc, runTransaction } = window._firestore;
@@ -1152,7 +1153,8 @@ async function uploadImagesToStorage(files, listingId) {
 document.getElementById('uploadForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    if (uploadedFiles.length === 0) {
+    if (uploadedFiles.length === 0 && !editingListingId) {
+        // 新增必须至少 1 张图；编辑模式可以不重新上传图片
         alert('请至少上传一张图片');
         return;
     }
@@ -1181,23 +1183,55 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
         nearby3: document.getElementById('nearby3').value,
         nearby4: document.getElementById('nearby4').value,
         caption: document.getElementById('generatedCaption').textContent,
-        date: new Date().toISOString()
+        // 新增时写 now，编辑时保留原 date，不在这里覆盖
     };
 
     try {
-const { db, collection, doc, setDoc } = window._firestore;
-const listingsCol = collection(db, "listings");
-const newDocRef = doc(listingsCol);
+        const { db, collection, doc, setDoc } = window._firestore;
+        const listingsCol = collection(db, "listings");
 
-// 🔢 生成唯一 LR 编号
-const code = await getNextListingCode();
+        if (!editingListingId) {
+            // ========== 新增 ==========
+            const newDocRef = doc(listingsCol);
 
-await setDoc(newDocRef, { ...baseData, code, images: [] });
-const imageUrls = await uploadImagesToStorage(uploadedFiles, newDocRef.id);
-await setDoc(newDocRef, { ...baseData, code, images: imageUrls }, { merge: true });
+            // 生成唯一 LR 编号
+            const code = await getNextListingCode();
+            const dataWithDate = { ...baseData, code, date: new Date().toISOString() };
 
+            await setDoc(newDocRef, { ...dataWithDate, images: [] });
+            const imageUrls = await uploadImagesToStorage(uploadedFiles, newDocRef.id);
+            await setDoc(newDocRef, { ...dataWithDate, images: imageUrls }, { merge: true });
 
-        alert('房源发布成功！');
+            alert('房源发布成功！');
+        } else {
+            // ========== 编辑 ==========
+            const listing = listings.find(l => l.id === editingListingId);
+            if (!listing) {
+                alert('未找到要编辑的房源');
+                return;
+            }
+
+            const docRef = doc(listingsCol, editingListingId);
+
+            // 保留原来的 code 和 date
+            const dataToSave = {
+                ...listing,         // 先铺原始数据（含 code / date / images）
+                ...baseData         // 再用表单内容覆盖可编辑字段
+            };
+
+            // 如果这次有重新上传图片，就覆盖 images；否则用原 images
+            if (uploadedFiles.length > 0) {
+                const imageUrls = await uploadImagesToStorage(uploadedFiles, editingListingId);
+                dataToSave.images = imageUrls;
+            }
+
+            await setDoc(docRef, dataToSave, { merge: false });
+
+            alert('房源更新成功！');
+        }
+
+        // 提交后统一重置
+        editingListingId = null;
         document.getElementById('uploadForm').reset();
         uploadedImages = [];
         uploadedFiles = [];
@@ -1210,9 +1244,10 @@ await setDoc(newDocRef, { ...baseData, code, images: imageUrls }, { merge: true 
         refreshMyListings();
     } catch (err) {
         console.error(err);
-        alert('房源发布失败，请稍后再试');
+        alert('操作失败，请稍后再试');
     }
 });
+
 
 // 仪表板 - 更新统计数据 + 最近删除列表
 async function updateDashboard() {
@@ -1296,18 +1331,77 @@ function createListingCard(listing) {
 </div>
 
             <div class="listing-card-actions">
-                <button class="btn btn-small btn-primary view-btn">查看详情</button>
-                ${listing.user === currentUser ? `<button class="btn btn-small btn-danger delete-btn">删除</button>` : ''}
-            </div>
+    <button class="btn btn-small btn-primary view-btn">查看详情</button>
+    ${listing.user === currentUser ? `
+        <button class="btn btn-small btn-secondary edit-btn">编辑</button>
+        <button class="btn btn-small btn-danger delete-btn">删除</button>
+    ` : ''}
+</div>
+
         </div>
     `;
 
     card.querySelector('.view-btn').addEventListener('click', () => viewListing(listing.id));
-    if (listing.user === currentUser) {
-        card.querySelector('.delete-btn').addEventListener('click', () => deleteListing(listing.id));
-    }
+if (listing.user === currentUser) {
+    card.querySelector('.edit-btn').addEventListener('click', () => startEditListing(listing.id));
+    card.querySelector('.delete-btn').addEventListener('click', () => deleteListing(listing.id));
+}
+
 
     return card;
+}
+        
+function startEditListing(id) {
+    const listing = listings.find(l => l.id === id);
+    if (!listing) {
+        alert('未找到要编辑的房源');
+        return;
+    }
+
+    editingListingId = id;
+
+    // 切到“上传房源”tab
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('upload').classList.add('active');
+    document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+    document.querySelector('.menu-link[data-section="upload"]').classList.add('active');
+
+    // 填充表单字段
+    document.getElementById('propertyType').value = listing.type || '';
+    document.getElementById('location').value = listing.location || '';
+    if (document.getElementById('state')) {
+        document.getElementById('state').value = listing.state || '';
+    }
+    document.getElementById('price').value = listing.price || '';
+    document.getElementById('area').value = listing.area || '';
+    document.getElementById('bedrooms').value = listing.bedrooms || 0;
+    document.getElementById('bathrooms').value = listing.bathrooms || 0;
+    document.getElementById('floor').value = listing.floor || '';
+    document.getElementById('carpark').value = listing.carpark || '';
+    document.getElementById('direction').value = listing.direction || '';
+    document.getElementById('furnished').value = listing.furnished || '';
+    document.getElementById('securityDeposit').value = listing.securityDeposit || '';
+    document.getElementById('utilitiesDeposit').value = listing.utilitiesDeposit || '';
+    document.getElementById('otherDeposit').value = listing.otherDeposit || '';
+    document.getElementById('remarks').value = listing.remarks || '';
+    document.getElementById('agentName').value = listing.agentName || '';
+    document.getElementById('address').value = listing.address || '';
+    document.getElementById('nearby1').value = listing.nearby1 || '';
+    document.getElementById('nearby2').value = listing.nearby2 || '';
+    document.getElementById('nearby3').value = listing.nearby3 || '';
+    document.getElementById('nearby4').value = listing.nearby4 || '';
+
+    // 文案显示（不强制重新生成）
+    document.getElementById('generatedCaption').innerHTML = listing.caption
+        ? `<div class="generated-caption">${listing.caption.replace(/\n/g, '<br>')}</div>`
+        : '';
+
+    // 预览区清空，让你决定要不要重新传图（现在编辑不自动载入旧图，只影响新的上传）
+    uploadedImages = [];
+    uploadedFiles = [];
+    document.getElementById('imagePreview').innerHTML = '';
+
+    alert(`正在编辑房源：${listing.code || ''} ${listing.location || ''}`);
 }
 
 function viewListing(id) {
@@ -1373,19 +1467,31 @@ function viewListing(id) {
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-primary btn-small copy-caption-btn">📋 复制文案</button>
-            <button class="btn btn-secondary btn-small download-images-btn">📥 下载所有图片</button>
-            <button class="btn btn-secondary btn-small close-modal-btn">关闭</button>
-        </div>
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button class="btn btn-primary btn-small copy-caption-btn">📋 复制文案</button>
+    <button class="btn btn-secondary btn-small download-images-btn">📥 下载所有图片</button>
+    ${listing.user === currentUser ? `
+        <button class="btn btn-small btn-secondary edit-listing-btn">✏️ 编辑</button>
+    ` : ''}
+    <button class="btn btn-secondary btn-small close-modal-btn">关闭</button>
+</div>
+
     `;
 
-    modalContent.querySelector('.copy-caption-btn')
-        .addEventListener('click', () => copyListingCaption(listing.id));
-    modalContent.querySelector('.download-images-btn')
-        .addEventListener('click', () => downloadImages(listing.id));
-    modalContent.querySelector('.close-modal-btn')
-        .addEventListener('click', () => modal.classList.remove('active'));
+modalContent.querySelector('.copy-caption-btn')
+    .addEventListener('click', () => copyListingCaption(listing.id));
+modalContent.querySelector('.download-images-btn')
+    .addEventListener('click', () => downloadImages(listing.id));
+const editBtn = modalContent.querySelector('.edit-listing-btn');
+if (editBtn) {
+    editBtn.addEventListener('click', () => {
+        startEditListing(listing.id);
+        modal.classList.remove('active');
+    });
+}
+modalContent.querySelector('.close-modal-btn')
+    .addEventListener('click', () => modal.classList.remove('active'));
+
 
     modal.classList.add('active');
 }
