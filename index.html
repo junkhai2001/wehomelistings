@@ -1233,6 +1233,7 @@ function createListingCard(listing) {
             <div class="listing-card-price">RM ${listing.price.toLocaleString()}</div>
             <div class="listing-card-info">
                 <p>${listing.bedrooms}房 ${listing.bathrooms}厕 | ${listing.area} sq.ft</p>
+                <p>地址：${listing.address || '-'}</p>
                 <p>发布者：${listing.user}</p>
             </div>
             <div class="listing-card-actions">
