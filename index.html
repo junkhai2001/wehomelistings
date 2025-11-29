@@ -749,7 +749,7 @@
 
                         <div class="form-row full">
                             <div class="form-group">
-                                <label>上传照片 (最多10张) *</label>
+                                <label>上传照片，请依据排版上传，例：外观-客厅-厨房-房间-厕所-Facilities (最多10张) *</label>
                                 <div class="image-upload" id="imageUpload">
                                     <p>点击或拖拽图片到这里上传</p>
                                     <input type="file" id="imageInput" multiple accept="image/*">
@@ -1193,63 +1193,95 @@ function generateCaption(type, location, price, area, bedrooms, bathrooms) {
             return card;
         }
 
-        function viewListing(id) {
-            const listing = listings.find(l => l.id === id);
-            if (!listing) return;
+function viewListing(id) {
+    const listing = listings.find(l => l.id === id);
+    if (!listing) return;
 
-            const modal = document.getElementById('listingModal');
-            const modalContent = document.getElementById('modalContent');
+    const modal = document.getElementById('listingModal');
+    const modalContent = document.getElementById('modalContent');
 
-            let galleryHTML = '';
-            if (listing.images && listing.images.length > 0) {
-                galleryHTML = `
-                    <img src="${listing.images[0]}" class="listing-detail-image" id="mainImage" alt="${listing.type}">
-                `;
-            }
-
-            modalContent.innerHTML = `
-                <h2>${listing.type} - ${listing.location}</h2>
-                ${galleryHTML}
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div>
-                        <p><strong style="color: #27ae60; font-size: 18px;">RM ${listing.price.toLocaleString()}</strong></p>
-                        <p><strong>面积：</strong> ${listing.area} sq.ft</p>
-                        <p><strong>房间：</strong> ${listing.bedrooms} 房 ${listing.bathrooms} 厕</p>
-                    </div>
-                    <div>
-                        <p><strong>发布者：</strong> ${listing.user}</p>
-                        <p><strong>发布时间：</strong> ${new Date(listing.date).toLocaleDateString('zh-CN')}</p>
-                    </div>
+    // 大图 + 可切换小图
+    let galleryHTML = '';
+    if (listing.images && listing.images.length > 0) {
+        galleryHTML = `
+            <img src="${listing.images[0]}" class="listing-detail-image" id="mainImage" alt="${listing.type}">
+            ${listing.images.length > 1 ? `
+                <div class="listing-detail-gallery">
+                    ${listing.images.map((img, idx) => `
+                        <img src="${img}" alt="photo ${idx + 1}" onclick="document.getElementById('mainImage').src='${img}'">
+                    `).join('')}
                 </div>
+            ` : ''}
+        `;
+    }
 
-                <div style="margin-bottom: 20px;">
-                    <h3>详细资料</h3>
-                    <p><strong>楼层：</strong> ${listing.floor || '-'}</p>
-                    <p><strong>停车位：</strong> ${listing.carpark || '-'}</p>
-                    <p><strong>朝向：</strong> ${listing.direction || '-'}</p>
-                    <p><strong>家私：</strong> ${listing.furnished || '-'}</p>
-                </div>
+    modalContent.innerHTML = `
+        <h2 style="margin-bottom: 20px;">${listing.type} - ${listing.location}</h2>
+        ${galleryHTML}
 
-                <div style="margin-bottom: 20px;">
-                    <h3>房源文案</h3>
-                    <div class="generated-caption">${(listing.caption || '暂无文案').replace(/\n/g, '<br>')}</div>
-                </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div>
+                <p><strong style="color: #27ae60; font-size: 18px;">RM ${listing.price.toLocaleString()}</strong></p>
+                <p><strong>面积：</strong> ${listing.area || '-'} sq.ft</p>
+                <p><strong>房间/浴室：</strong> ${listing.bedrooms || 0} 房 ${listing.bathrooms || 0} 厕</p>
+            </div>
+            <div>
+                <p><strong>发布者：</strong> ${listing.user || '-'}</p>
+                <p><strong>发布时间：</strong> ${listing.date ? new Date(listing.date).toLocaleDateString('zh-CN') : '-'}</p>
+            </div>
+        </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-primary btn-small copy-caption-btn">📋 复制文案</button>
-                    <button class="btn btn-secondary btn-small download-images-btn">📥 下载所有图片</button>
-                    <button class="btn btn-secondary btn-small close-modal-btn">关闭</button>
-                </div>
-            `;
+        <div style="margin-bottom: 20px;">
+            <h3>详细资料</h3>
+            <p><strong>楼层：</strong> ${listing.floor || '-'}</p>
+            <p><strong>停车位：</strong> ${listing.carpark || '-'}</p>
+            <p><strong>朝向：</strong> ${listing.direction || '-'}</p>
+            <p><strong>家私：</strong> ${listing.furnished || '-'}</p>
+            <p><strong>Security Deposit：</strong> ${listing.securityDeposit || '-'}</p>
+            <p><strong>Utilities Deposit：</strong> ${listing.utilitiesDeposit || '-'}</p>
+            <p><strong>Other Deposit：</strong> ${listing.otherDeposit || '-'}</p>
+        </div>
 
-            modalContent.querySelector('.copy-caption-btn').addEventListener('click', () => copyListingCaption(listing.id));
-            modalContent.querySelector('.download-images-btn').addEventListener('click', () => downloadImages(listing.id));
-            modalContent.querySelector('.close-modal-btn').addEventListener('click', () => {
-                modal.classList.remove('active');
-            });
+        <div style="margin-bottom: 20px;">
+            <h3>周边配套</h3>
+            <p><strong>Nearby 1：</strong> ${listing.nearby1 || '-'}</p>
+            <p><strong>Nearby 2：</strong> ${listing.nearby2 || '-'}</p>
+            <p><strong>Nearby 3：</strong> ${listing.nearby3 || '-'}</p>
+            <p><strong>Nearby 4：</strong> ${listing.nearby4 || '-'}</p>
+        </div>
 
-            modal.classList.add('active');
-        }
+        <div style="margin-bottom: 20px;">
+            <h3>Agent / 地址 / 备注</h3>
+            <p><strong>Agent：</strong> ${listing.agentName || '-'}</p>
+            <p><strong>地址：</strong> ${listing.address || '-'}</p>
+            <p><strong>备注：</strong> ${listing.remarks || '-'}</p>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h3>房源文案</h3>
+            <div class="generated-caption">
+                ${listing.caption ? listing.caption.replace(/\n/g, '<br>') : '暂无文案'}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary btn-small copy-caption-btn">📋 复制文案</button>
+            <button class="btn btn-secondary btn-small download-images-btn">📥 下载所有图片</button>
+            <button class="btn btn-secondary btn-small close-modal-btn">关闭</button>
+        </div>
+    `;
+
+    // 按钮事件
+    modalContent.querySelector('.copy-caption-btn')
+        .addEventListener('click', () => copyListingCaption(listing.id));
+    modalContent.querySelector('.download-images-btn')
+        .addEventListener('click', () => downloadImages(listing.id));
+    modalContent.querySelector('.close-modal-btn')
+        .addEventListener('click', () => modal.classList.remove('active'));
+
+    modal.classList.add('active');
+}
+
 
         function copyListingCaption(id) {
             const listing = listings.find(l => l.id === id);
