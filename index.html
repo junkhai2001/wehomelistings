@@ -531,7 +531,7 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        window._firestore = { db, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, runTransaction };
+       window._firestore = { db, collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, setDoc, runTransaction };
         window._storage = { storage, ref, uploadBytes, getDownloadURL };
     </script>
 </head>
@@ -1185,14 +1185,17 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
     };
 
     try {
-        const { db, collection, doc, setDoc } = window._firestore;
-        const listingsCol = collection(db, "listings");
-        const newDocRef = doc(listingsCol);
-        const code = await getNextListingCode();
+const { db, collection, doc, setDoc } = window._firestore;
+const listingsCol = collection(db, "listings");
+const newDocRef = doc(listingsCol);
 
-        await setDoc(newDocRef, { ...baseData, images: [] });
-        const imageUrls = await uploadImagesToStorage(uploadedFiles, newDocRef.id);
-        await setDoc(newDocRef, { ...baseData, images: imageUrls }, { merge: true });
+// 🔢 生成唯一 LR 编号
+const code = await getNextListingCode();
+
+await setDoc(newDocRef, { ...baseData, code, images: [] });
+const imageUrls = await uploadImagesToStorage(uploadedFiles, newDocRef.id);
+await setDoc(newDocRef, { ...baseData, code, images: imageUrls }, { merge: true });
+
 
         alert('房源发布成功！');
         document.getElementById('uploadForm').reset();
