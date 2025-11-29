@@ -1344,6 +1344,7 @@ function copyListingCaption(id) {
     });
 }
 
+// 一键静默下载（需要 Firebase Storage 已正确配置 CORS）
 function downloadImages(id) {
     const listing = listings.find(l => l.id === id);
     if (!listing || !listing.images || !listing.images.length) {
@@ -1353,21 +1354,43 @@ function downloadImages(id) {
 
     const total = listing.images.length;
     let success = 0;
+    let fail = 0;
+
+    alert('开始为你准备下载图片，请等待几秒，不要关闭页面。');
 
     listing.images.forEach((img, idx) => {
-        const a = document.createElement('a');
-        a.href = img;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        success++;
-    });
+        const imageUrl = img;
 
-    alert(`已为你打开 ${total} 个图片标签，可以在浏览器里另存为。`);
+        fetch(imageUrl)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                return res.blob();
+            })
+            .then(blob => {
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = `${listing.location || 'image'}_${idx + 1}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+                success++;
+            })
+            .catch(err => {
+                console.error('下载失败', idx + 1, err);
+                fail++;
+            })
+            .finally(() => {
+                if (success + fail === total) {
+                    alert(`下载完成：成功 ${success} 张，失败 ${fail} 张`);
+                }
+            });
+    });
 }
+
 
 // 软删除：先写到 deleted_listings，再从 listings 删除
 async function deleteListing(id) {
