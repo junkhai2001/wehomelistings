@@ -1205,12 +1205,12 @@ recentDeletedDiv.innerHTML = deleted.map(item => {
                     <div style="font-size: 12px; color: #7f8c8d;">发布者：${item.user || '-'} | 删除人：${item.deletedBy || '-'}</div>
                     <div style="font-size: 11px; color: #95a5a6;">删除时间：${delDate}</div>
                 </div>
+                ${isOwner ? `
                 <div style="display:flex; flex-direction:column; gap:4px;">
-                    ${isOwner ? `
-                        <button class="btn btn-small btn-secondary" onclick="restoreListing('${item.id}')">🔄 恢复</button>
-                    ` : ''}
+                    <button class="btn btn-small btn-secondary" onclick="restoreListing('${item.id}')">🔄 恢复</button>
                     <button class="btn btn-small btn-danger" onclick="permanentlyDeleteListing('${item.id}')">🗑 彻底删除</button>
                 </div>
+                ` : ''}
             </div>
         </div>
     `;
@@ -1489,19 +1489,36 @@ async function permanentlyDeleteListing(id) {
     if (!confirm('确定要【彻底删除】这条记录吗？此操作不可恢复！')) return;
 
     try {
-        const { db, deleteDoc, doc } = window._firestore;
+        const { db, collection, getDocs, deleteDoc, doc } = window._firestore;
+
+        // 读出这条 deleted_listings 记录，检查 user
+        const deletedCol = collection(db, "deleted_listings");
+        const snap = await getDocs(deletedCol);
+        let record = null;
+        snap.forEach(d => {
+            if (d.id === id) {
+                record = d.data();
+            }
+        });
+        if (!record) {
+            alert('未找到要删除的记录');
+            return;
+        }
+
+        if (record.user !== currentUser) {
+            alert('你不是这条房源的发布者，不能彻底删除。');
+            return;
+        }
 
         await deleteDoc(doc(db, "deleted_listings", id));
-
-        // 只需要刷新仪表盘列表即可
         await updateDashboard();
-
         alert('已从删除记录中彻底删除。');
     } catch (err) {
         console.error(err);
         alert('彻底删除失败：' + err.message);
     }
 }
+
 
 
 
