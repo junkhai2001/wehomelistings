@@ -996,45 +996,63 @@
             document.getElementById('generatedCaption').innerHTML = `<div class="generated-caption">${caption}</div>`;
         });
 
-        function generateCaption(type, location, price, area, bedrooms, bathrooms) {
-            const furnished = document.getElementById('furnished').value || '';
-            const floor = document.getElementById('floor').value || '';
-            const carpark = document.getElementById('carpark').value || '';
-            const direction = document.getElementById('direction').value || '';
-            const agentName = document.getElementById('agentName').value || '';
-            const nearby1 = document.getElementById('nearby1').value || '';
-            const nearby2 = document.getElementById('nearby2').value || '';
-            const nearby3 = document.getElementById('nearby3').value || '';
-            const nearby4 = document.getElementById('nearby4').value || '';
+function generateCaption(type, location, price, area, bedrooms, bathrooms) {
+    const furnished = document.getElementById('furnished').value || '';
+    const floor = document.getElementById('floor').value || '';
+    const carpark = document.getElementById('carpark').value || '';
+    const direction = document.getElementById('direction').value || '';
+    const agentName = document.getElementById('agentName').value || '';
+    const nearby1 = document.getElementById('nearby1').value || '';
+    const nearby2 = document.getElementById('nearby2').value || '';
+    const nearby3 = document.getElementById('nearby3').value || '';
+    const nearby4 = document.getElementById('nearby4').value || '';
 
-            const priceText = parseInt(price).toLocaleString();
-            // 不要中括号，直接在前面加 Furnished 信息
-const furnishedTitle = furnished ? `${furnished} ` : '';
-const title = `${furnishedTitle}${location} – ${type} For Rent RM${priceText}`;
+    const priceText = parseInt(price).toLocaleString();
 
+    // 标题：去掉中括号，用家私作为前缀（有就加“Fully Furnished ”，没有就直接地点）
+    const furnishedTitle = furnished ? `${furnished} ` : '';
+    const title = `${furnishedTitle}${location} – ${type} For Rent RM${priceText}`;
 
-            let detailsLines = [];
-            if (bedrooms) detailsLines.push(`• ${bedrooms} Bedrooms`);
-            if (bathrooms) detailsLines.push(`• ${bathrooms} Bathrooms`);
-            if (area) detailsLines.push(`• Size ${area} sq.ft`);
-            if (floor) detailsLines.push(`• Floor: ${floor}`);
-            if (carpark) detailsLines.push(`• Car Park: ${carpark}`);
-            if (direction) detailsLines.push(`• Direction: ${direction}`);
-            if (furnished) detailsLines.push(`• ${furnished}`);
+    // House Details，用不同小图标
+    let detailsLines = [];
+    if (bedrooms) detailsLines.push(`🛏 ${bedrooms} Bedrooms`);
+    if (bathrooms) detailsLines.push(`🛁 ${bathrooms} Bathrooms`);
+    if (area) detailsLines.push(`📐 Size ${area} sq.ft`);
+    if (floor) detailsLines.push(`🏢 Floor: ${floor}`);
+    if (carpark) detailsLines.push(`🚗 Car Park: ${carpark}`);
+    if (direction) detailsLines.push(`🧭 Direction: ${direction}`);
+    if (furnished) detailsLines.push(`🛋 ${furnished}`);
 
-            const detailsBlock = detailsLines.length ? `House Details:\n${detailsLines.join('\n')}` : '';
+    const detailsBlock = detailsLines.length
+        ? `House Details:\n${detailsLines.join('\n')}`
+        : '';
 
-            let nearbyLines = [];
-            if (nearby1) nearbyLines.push(`• ${nearby1}`);
-            if (nearby2) nearbyLines.push(`• ${nearby2}`);
-            if (nearby3) nearbyLines.push(`• ${nearby3}`);
-            if (nearby4) nearbyLines.push(`• ${nearby4}`);
+    // Nearby Access，用 📍 图标
+    let nearbyLines = [];
+    if (nearby1) nearbyLines.push(`📍 ${nearby1}`);
+    if (nearby2) nearbyLines.push(`📍 ${nearby2}`);
+    if (nearby3) nearbyLines.push(`📍 ${nearby3}`);
+    if (nearby4) nearbyLines.push(`📍 ${nearby4}`);
 
-            const nearbyBlock = nearbyLines.length ? `Nearby Access:\n${nearbyLines.join('\n')}` : '';
-            const contactLine = agentName ? `Interested, please contact ${agentName}.` : 'Interested, please contact for more details.';
+    const nearbyBlock = nearbyLines.length
+        ? `Nearby Access:\n${nearbyLines.join('\n')}`
+        : '';
 
-            return [title, '', detailsBlock, '', nearbyBlock, '', contactLine].filter(Boolean).join('\n');
-        }
+    const contactLine = agentName
+        ? `☎️ Interested, please contact ${agentName}.`
+        : `☎️ Interested, please contact for more details.`;
+
+    return [
+        title,
+        '',
+        detailsBlock,
+        '',
+        nearbyBlock,
+        '',
+        contactLine
+    ].filter(Boolean).join('\n');
+}
+
 
         // 复制文案
         document.getElementById('copyCaption').addEventListener('click', async function() {
