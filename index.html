@@ -1178,7 +1178,7 @@ function generateCaption(type, location, price, area, bedrooms, bathrooms) {
     const priceText = parseInt(price).toLocaleString();
     
     // 标题：去掉中括号
-    const furnishedTitle = furnished ? `${furnished} ` : '';
+    const furnishedTitle = furnished ? `${furnished} Furnished ` : '';
     const title = `${furnishedTitle}${location} – ${type} For Rent RM${priceText}`;
 
     // 用不同图标
@@ -1186,7 +1186,7 @@ function generateCaption(type, location, price, area, bedrooms, bathrooms) {
     if (bedrooms) detailsLines.push(`🛏 ${bedrooms} Bedrooms`);
     if (bathrooms) detailsLines.push(`🛁 ${bathrooms} Bathrooms`);
     if (area) detailsLines.push(`📐 Size ${area} sq.ft`);
-    if (furnished) detailsLines.push(`🛋 ${furnished} `);
+    if (furnished) detailsLines.push(`🛋 ${furnished} Furnished `);
     if (floor) detailsLines.push(`🏢 Floor: ${floor}`);
     if (carpark) detailsLines.push(`🚗 Car Park: ${carpark}`);
     if (direction) detailsLines.push(`🧭 Direction: ${direction}`);
