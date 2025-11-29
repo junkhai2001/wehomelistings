@@ -605,6 +605,13 @@
                     <h2>最近上传的房源</h2>
                     <div id="recentListings" class="listing-grid"></div>
                 </div>
+                <div class="card">
+    <h2>最近 7 天删除的房源</h2>
+    <div id="recentDeleted" style="font-size: 14px; line-height: 1.6;">
+        <!-- 动态生成 -->
+    </div>
+</div>
+
             </div>
 
             <div id="upload" class="section">
@@ -1348,22 +1355,42 @@ function downloadImages(id) {
 }
 
 
-        async function deleteListing(id) {
-            if (!confirm('确定要删除这条房源吗？')) return;
+async function deleteListing(id) {
+    if (!confirm('确定要删除这条房源吗？')) return;
 
-            try {
-                const { db, deleteDoc, doc } = window._firestore;
-                await deleteDoc(doc(db, "listings", id));
-                await loadListingsFromFirestore();
-                updateDashboard();
-                refreshListings();
-                refreshMyListings();
-                alert('删除成功！');
-            } catch (err) {
-                console.error(err);
-                alert('删除失败');
-            }
+    try {
+        const { db, deleteDoc, doc, collection, setDoc } = window._firestore;
+        const listing = listings.find(l => l.id === id);
+        if (!listing) {
+            alert('这条房源不存在');
+            return;
         }
+
+        // 1）先把要删的房源，连同删除时间，写到 deleted_listings 里
+        const deletedCol = collection(db, "deleted_listings");
+        const deletedDocRef = doc(deletedCol, id); // 用同一个 id 存
+        await setDoc(deletedDocRef, {
+            ...listing,
+            deletedAt: new Date().toISOString(),
+            deletedBy: currentUser
+        });
+
+        // 2）再从 listings 正式删除
+        await deleteDoc(doc(db, "listings", id));
+
+        // 3）刷新本地数据
+        await loadListingsFromFirestore();
+        updateDashboard();
+        refreshListings();
+        refreshMyListings();
+        alert('删除成功！该房源已记录到“删除记录”里。');
+
+    } catch (err) {
+        console.error(err);
+        alert('删除失败');
+    }
+}
+
 
         function refreshListings() {
             const container = document.getElementById('listingsContainer');
