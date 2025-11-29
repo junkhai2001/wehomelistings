@@ -1770,35 +1770,29 @@ function filterListingCommon(l) {
     const matchFurnished = !furnishedFilter || furnishedText.includes(furnishedFilter.toLowerCase());
 
     // ===== Race 逻辑 =====
+    // ===== Race 逻辑（新版）=====
     const raceList = Array.isArray(l.race) ? l.race : [];
 
     let matchRace = true;
 
     if (!raceFilter) {
-        // “Race 不限” -> 不过滤
+        // “Race 不限” -> 不过滤，全部显示
         matchRace = true;
     } else if (raceFilter === 'All Race') {
-        // A: All Race -> 只显示“完全不限”的房源
-        // 这里认为：全不限制 = race 是空数组 或 只包含 "All Race"
-        matchRace =
-            raceList.length === 0 ||
-            (raceList.length === 1 && raceList[0] === 'All Race');
+        // A: All Race -> 也不过滤，显示所有房源
+        matchRace = true;
     } else if (raceFilter === 'Malay') {
-        // B: Only Malay -> 只包含 Malay，不能有其他种族
-        matchRace =
-            raceList.length === 1 &&
-            raceList[0] === 'Malay';
+        // B: 显示所有“包含 Malay”的房源
+        matchRace = raceList.includes('Malay');
     } else if (raceFilter === 'Indian') {
-        // C: Only Indian
-        matchRace =
-            raceList.length === 1 &&
-            raceList[0] === 'Indian';
+        // C: 显示所有“包含 Indian”的房源
+        matchRace = raceList.includes('Indian');
     } else if (raceFilter === 'Chinese') {
-        // D: Only Chinese
-        matchRace =
-            raceList.length === 1 &&
-            raceList[0] === 'Chinese';
+        // D: 显示所有“包含 Chinese”的房源
+        matchRace = raceList.includes('Chinese');
     }
+    // ===== Race 逻辑结束 =====
+
 
     return matchKeyword && matchState && matchPriceMin && matchPriceMax && matchFurnished && matchRace;
 }
