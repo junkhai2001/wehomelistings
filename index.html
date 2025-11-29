@@ -1633,51 +1633,10 @@ async function deleteListing(id) {
         // 3) 刷新本地数据
         await loadListingsFromFirestore();
         updateDashboard();
-        function filterListingCommon(l) {
-    const keywordInput = document.getElementById('searchListings');
-    const stateSelect = document.getElementById('filterState');
-    const priceMinInput = document.getElementById('priceMin');
-    const priceMaxInput = document.getElementById('priceMax');
-    const furnishedSelect = document.getElementById('filterFurnished');
-    const raceSelect = document.getElementById('filterRace');
-
-    const keyword = keywordInput ? keywordInput.value.trim().toLowerCase() : '';
-    const stateFilter = stateSelect ? stateSelect.value : '';
-    const priceMin = priceMinInput && priceMinInput.value ? Number(priceMinInput.value) : null;
-    const priceMax = priceMaxInput && priceMaxInput.value ? Number(priceMaxInput.value) : null;
-    const furnishedFilter = furnishedSelect ? furnishedSelect.value : '';
-    const raceFilter = raceSelect ? raceSelect.value : '';
-
-    // 关键字：位置 / 类型 / 价格 / Code
-    const text = [
-        l.location || '',
-        l.type || '',
-        String(l.price || ''),
-        l.code || ''
-    ].join(' ').toLowerCase();
-    const matchKeyword = !keyword || text.includes(keyword);
-
-    // 州属
-    const matchState = !stateFilter || l.state === stateFilter;
-
-    // 价格区间
-    const price = Number(l.price || 0);
-    const matchPriceMin = priceMin === null || price >= priceMin;
-    const matchPriceMax = priceMax === null || price <= priceMax;
-
-    // 家私（模糊匹配 Fully / Partially / No）
-    const furnishedText = (l.furnished || '').toLowerCase();
-    const matchFurnished = !furnishedFilter || furnishedText.includes(furnishedFilter.toLowerCase());
-
-    // Race
-    const raceList = Array.isArray(l.race) ? l.race : [];
-    const matchRace = !raceFilter || raceList.includes(raceFilter);
-
-    return matchKeyword && matchState && matchPriceMin && matchPriceMax && matchFurnished && matchRace;
-}
         refreshListings();
         refreshMyListings();
         alert('删除成功！该房源已记录到"删除记录"里。');
+
 
     } catch (err) {
         console.error(err);
@@ -1772,6 +1731,43 @@ async function permanentlyDeleteListing(id) {
 
 
 
+function filterListingCommon(l) {
+    const keywordInput = document.getElementById('searchListings');
+    const stateSelect = document.getElementById('filterState');
+    const priceMinInput = document.getElementById('priceMin');
+    const priceMaxInput = document.getElementById('priceMax');
+    const furnishedSelect = document.getElementById('filterFurnished');
+    const raceSelect = document.getElementById('filterRace');
+
+    const keyword = keywordInput ? keywordInput.value.trim().toLowerCase() : '';
+    const stateFilter = stateSelect ? stateSelect.value : '';
+    const priceMin = priceMinInput && priceMinInput.value ? Number(priceMinInput.value) : null;
+    const priceMax = priceMaxInput && priceMaxInput.value ? Number(priceMaxInput.value) : null;
+    const furnishedFilter = furnishedSelect ? furnishedSelect.value : '';
+    const raceFilter = raceSelect ? raceSelect.value : '';
+
+    const text = [
+        l.location || '',
+        l.type || '',
+        String(l.price || ''),
+        l.code || ''
+    ].join(' ').toLowerCase();
+    const matchKeyword = !keyword || text.includes(keyword);
+
+    const matchState = !stateFilter || l.state === stateFilter;
+
+    const price = Number(l.price || 0);
+    const matchPriceMin = priceMin === null || price >= priceMin;
+    const matchPriceMax = priceMax === null || price <= priceMax;
+
+    const furnishedText = (l.furnished || '').toLowerCase();
+    const matchFurnished = !furnishedFilter || furnishedText.includes(furnishedFilter.toLowerCase());
+
+    const raceList = Array.isArray(l.race) ? l.race : [];
+    const matchRace = !raceFilter || raceList.includes(raceFilter);
+
+    return matchKeyword && matchState && matchPriceMin && matchPriceMax && matchFurnished && matchRace;
+}
 
 
 function refreshListings() {
