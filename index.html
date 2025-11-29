@@ -1429,6 +1429,7 @@ async function deleteListing(id) {
     }
 }
         // 从 deleted_listings 恢复到 listings
+// 从 deleted_listings 恢复到 listings（只有原发布者可以恢复）
 async function restoreListing(id) {
     if (!confirm('确定要恢复这条房源吗？')) return;
 
@@ -1449,12 +1450,14 @@ async function restoreListing(id) {
             return;
         }
 
-        // 删除时多加的 deletedAt / deletedBy 不需要再写回
-        const {
-            deletedAt,
-            deletedBy,
-            ...listingData
-        } = dataToRestore;
+        // ✅ 权限检查：只有原发布者本人可以恢复
+        if (dataToRestore.user !== currentUser) {
+            alert('你不是这条房源的发布者，不能恢复。');
+            return;
+        }
+
+        // 删除时加的字段不需要写回
+        const { deletedAt, deletedBy, ...listingData } = dataToRestore;
 
         // 2）写回 listings（用同一个 id）
         const listingsCol = collection(db, "listings");
@@ -1464,7 +1467,7 @@ async function restoreListing(id) {
         // 3）从 deleted_listings 删除这条记录
         await deleteDoc(doc(db, "deleted_listings", id));
 
-        // 4）刷新本地
+        // 4）刷新
         await loadListingsFromFirestore();
         await updateDashboard();
         refreshListings();
@@ -1476,6 +1479,7 @@ async function restoreListing(id) {
         alert('恢复失败：' + err.message);
     }
 }
+
 
 
 function refreshListings() {
