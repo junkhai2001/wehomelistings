@@ -1249,24 +1249,55 @@
             });
         }
 
-        function downloadImages(id) {
-            const listing = listings.find(l => l.id === id);
-            if (!listing || !listing.images || !listing.images.length) {
-                alert('没有可下载的图片');
-                return;
-            }
+function downloadImages(id) {
+    const listing = listings.find(l => l.id === id);
+    if (!listing || !listing.images || !listing.images.length) {
+        alert('没有可下载的图片');
+        return;
+    }
 
-            listing.images.forEach((img, idx) => {
-                const link = document.createElement('a');
-                link.href = img;
-                link.download = `${listing.location}_${idx + 1}.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+    const total = listing.images.length;
+    let success = 0;
+    let fail = 0;
+
+    // 逐张用 fetch + blob 下载，再用隐藏 a 标签触发保存
+    listing.images.forEach((img, idx) => {
+        // Firebase Storage 的直接文件地址（你现在的 URL 已经带 alt=media 就不用再拼）
+        const imageUrl = img;
+
+        fetch(imageUrl)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                return res.blob();
+            })
+            .then(blob => {
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = `${listing.location || 'image'}_${idx + 1}.jpg`;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+                success++;
+            })
+            .catch(err => {
+                console.error('下载失败', idx + 1, err);
+                fail++;
+            })
+            .finally(() => {
+                if (success + fail === total) {
+                    alert(`下载完成：成功 ${success} 张，失败 ${fail} 张`);
+                }
             });
+    });
 
-            alert('图片下载已启动！');
-        }
+    alert('已经开始为你准备下载图片，请稍等几秒...');
+}
+
 
         async function deleteListing(id) {
             if (!confirm('确定要删除这条房源吗？')) return;
