@@ -1578,14 +1578,16 @@ async function permanentlyDeleteListing(id) {
 
 function refreshListings() {
     const container = document.getElementById('listingsContainer');
-    const keyword = document.getElementById('searchListings').value.trim().toLowerCase();
-    const stateFilter = document.getElementById('filterState') ? document.getElementById('filterState').value : '';
+    const keywordInput = document.getElementById('searchListings');
+    const stateSelect = document.getElementById('filterState');
+
+    const keyword = keywordInput ? keywordInput.value.trim().toLowerCase() : '';
+    const stateFilter = stateSelect ? stateSelect.value : '';
 
     container.innerHTML = '';
 
     listings
         .filter(l => {
-            // 关键字匹配（包含 code）
             const text = [
                 l.location || '',
                 l.type || '',
@@ -1593,10 +1595,7 @@ function refreshListings() {
                 l.code || ''
             ].join(' ').toLowerCase();
             const matchKeyword = !keyword || text.includes(keyword);
-
-            // 州属匹配
             const matchState = !stateFilter || l.state === stateFilter;
-
             return matchKeyword && matchState;
         })
         .forEach(listing => {
@@ -1604,14 +1603,34 @@ function refreshListings() {
         });
 }
 
-
 function refreshMyListings() {
     const container = document.getElementById('myListingsContainer');
+    const keywordInput = document.getElementById('searchListings');
+    const stateSelect = document.getElementById('filterState');
+
+    const keyword = keywordInput ? keywordInput.value.trim().toLowerCase() : '';
+    const stateFilter = stateSelect ? stateSelect.value : '';
+
     container.innerHTML = '';
-    listings.filter(l => l.user === currentUser).forEach(listing => {
-        container.appendChild(createListingCard(listing));
-    });
+
+    listings
+        .filter(l => l.user === currentUser)
+        .filter(l => {
+            const text = [
+                l.location || '',
+                l.type || '',
+                String(l.price || ''),
+                l.code || ''
+            ].join(' ').toLowerCase();
+            const matchKeyword = !keyword || text.includes(keyword);
+            const matchState = !stateFilter || l.state === stateFilter;
+            return matchKeyword && matchState;
+        })
+        .forEach(listing => {
+            container.appendChild(createListingCard(listing));
+        });
 }
+
 
 // 关闭模态框
 document.getElementById('closeModal').addEventListener('click', function() {
