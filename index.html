@@ -1817,26 +1817,30 @@ function filterListingCommon(l) {
     const matchFurnished = !furnishedFilter || furnishedText.includes(furnishedFilter.toLowerCase());
 
     // ===== Race 逻辑 =====
-    // ===== Race 逻辑（新版）=====
+    // ===== Race 逻辑（包含 All Race）=====
     const raceList = Array.isArray(l.race) ? l.race : [];
 
     let matchRace = true;
 
     if (!raceFilter) {
-        // “Race 不限” -> 不过滤，全部显示
         matchRace = true;
     } else if (raceFilter === 'All Race') {
-        // A: All Race -> 也不过滤，显示所有房源
         matchRace = true;
     } else if (raceFilter === 'Malay') {
-        // B: 显示所有“包含 Malay”的房源
-        matchRace = raceList.includes('Malay');
-    } else if (raceFilter === 'Indian') {
-        // C: 显示所有“包含 Indian”的房源
-        matchRace = raceList.includes('Indian');
+        matchRace =
+            raceList.includes('Malay') ||
+            raceList.includes('All Race') ||
+            raceList.length === 0;
     } else if (raceFilter === 'Chinese') {
-        // D: 显示所有“包含 Chinese”的房源
-        matchRace = raceList.includes('Chinese');
+        matchRace =
+            raceList.includes('Chinese') ||
+            raceList.includes('All Race') ||
+            raceList.length === 0;
+    } else if (raceFilter === 'Indian') {
+        matchRace =
+            raceList.includes('Indian') ||
+            raceList.includes('All Race') ||
+            raceList.length === 0;
     }
     // ===== Race 逻辑结束 =====
 
