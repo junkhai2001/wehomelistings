@@ -855,8 +855,7 @@
                     ...docSnap.data()
                 });
             });
-        }
-        // 读取最近 7 天删除的房源
+            // 读取最近 7 天删除的房源
 async function loadDeletedListingsLast7Days() {
     const { db, collection, getDocs } = window._firestore;
     const deletedCol = collection(db, "deleted_listings");
@@ -882,6 +881,8 @@ async function loadDeletedListingsLast7Days() {
     deleted.sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
     return deleted;
 }
+
+        }
 
 
         // 登录
