@@ -725,6 +725,17 @@
                                 <input type="text" id="nearby1" placeholder="500m to 99 Speed Mart">
                             </div>
                         </div>
+<div class="form-row full">
+    <div class="form-group">
+        <label>种族限制 Race</label>
+        <div id="raceOptions" style="display:flex; flex-wrap:wrap; gap:10px; font-size:14px;">
+            <label><input type="checkbox" name="race" value="All Race"> All Race</label>
+            <label><input type="checkbox" name="race" value="No Malay"> No Malay</label>
+            <label><input type="checkbox" name="race" value="No Indian"> No Indian</label>
+            <label><input type="checkbox" name="race" value="No Chinese"> No Chinese</label>
+        </div>
+    </div>
+</div>
 
                         <div class="form-row full">
                             <div class="form-group">
@@ -799,15 +810,38 @@
             <div id="listings" class="section">
                 <div class="card">
                     <h2>所有房源库</h2>
-<div class="search-box">
-    <input type="text" id="searchListings" placeholder="搜索位置、类型、价格或 Code...">
-    <select id="filterState" style="margin-left:8px;">
+<div class="search-box" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+    <input type="text" id="searchListings" placeholder="关键字：位置 / 类型 / Code" style="min-width:200px;">
+
+    <select id="filterState">
         <option value="">全部州属</option>
         <option value="Melaka">Melaka</option>
         <option value="Negeri Sembilan">Negeri Sembilan</option>
         <option value="Others">Others State</option>
     </select>
+
+    <input type="number" id="priceMin" placeholder="最低价" style="width:90px;">
+    <input type="number" id="priceMax" placeholder="最高价" style="width:90px;">
+
+    <select id="filterFurnished">
+        <option value="">家私不限</option>
+        <option value="Fully">Fully Furnished</option>
+        <option value="Partially">Partially Furnished</option>
+        <option value="No">Unfurnished</option>
+    </select>
+
+    <select id="filterRace">
+        <option value="">Race 不限</option>
+        <option value="All Race">All Race</option>
+        <option value="No Malay">No Malay</option>
+        <option value="No Indian">No Indian</option>
+        <option value="No Chinese">No Chinese</option>
+    </select>
+
+    <button class="btn btn-small btn-secondary" id="applyFilters">搜索</button>
+    <button class="btn btn-small btn-secondary" id="resetFilters">重置</button>
 </div>
+
 
                     <div id="listingsContainer" class="listing-grid"></div>
                 </div>
@@ -1159,6 +1193,10 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
         return;
     }
 
+    const raceValues = Array.from(
+        document.querySelectorAll('input[name="race"]:checked')
+    ).map(c => c.value);
+
     const baseData = {
         user: currentUser,
         type: document.getElementById('propertyType').value,
@@ -1172,6 +1210,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
         carpark: document.getElementById('carpark').value,
         direction: document.getElementById('direction').value,
         furnished: document.getElementById('furnished').value,
+        race: raceValues,  // ✅ 新增：Race 数组
         securityDeposit: document.getElementById('securityDeposit').value,
         utilitiesDeposit: document.getElementById('utilitiesDeposit').value,
         otherDeposit: document.getElementById('otherDeposit').value,
@@ -1183,7 +1222,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
         nearby3: document.getElementById('nearby3').value,
         nearby4: document.getElementById('nearby4').value,
         caption: document.getElementById('generatedCaption').textContent,
-        // 新增时写 now，编辑时保留原 date，不在这里覆盖
+        // date 在新增分支里用 new Date().toISOString()
     };
 
     try {
@@ -1326,9 +1365,11 @@ function createListingCard(listing) {
 <div class="listing-card-info">
     <p>${listing.bedrooms}房 ${listing.bathrooms}厕 | ${listing.area} sq.ft</p>
     <p>州属：${listing.state || '-'}</p>
+    <p>Race：${(listing.race && listing.race.length) ? listing.race.join(', ') : 'All Race'}</p>
     <p>地址：${listing.address || '-'}</p>
     <p>发布者：${listing.user}</p>
 </div>
+
 
             <div class="listing-card-actions">
     <button class="btn btn-small btn-primary view-btn">查看详情</button>
@@ -1390,6 +1431,11 @@ function startEditListing(id) {
     document.getElementById('nearby2').value = listing.nearby2 || '';
     document.getElementById('nearby3').value = listing.nearby3 || '';
     document.getElementById('nearby4').value = listing.nearby4 || '';
+        // 恢复 Race 多选
+    document.querySelectorAll('input[name="race"]').forEach(cb => {
+        cb.checked = Array.isArray(listing.race) && listing.race.includes(cb.value);
+    });
+
 
     // 文案显示（不强制重新生成）
     document.getElementById('generatedCaption').innerHTML = listing.caption
@@ -1436,6 +1482,7 @@ function viewListing(id) {
         <div style="margin-bottom: 20px;">
             <h3>详细资料</h3>
             <p><strong>州属：</strong> ${listing.state || '-'}</p>
+            <p><strong>Race：</strong> ${(listing.race && listing.race.length) ? listing.race.join(', ') : 'All Race'}</p>
             <p><strong>楼层：</strong> ${listing.floor || '-'}</p>
             <p><strong>停车位：</strong> ${listing.carpark || '-'}</p>
             <p><strong>朝向：</strong> ${listing.direction || '-'}</p>
@@ -1586,6 +1633,48 @@ async function deleteListing(id) {
         // 3) 刷新本地数据
         await loadListingsFromFirestore();
         updateDashboard();
+        function filterListingCommon(l) {
+    const keywordInput = document.getElementById('searchListings');
+    const stateSelect = document.getElementById('filterState');
+    const priceMinInput = document.getElementById('priceMin');
+    const priceMaxInput = document.getElementById('priceMax');
+    const furnishedSelect = document.getElementById('filterFurnished');
+    const raceSelect = document.getElementById('filterRace');
+
+    const keyword = keywordInput ? keywordInput.value.trim().toLowerCase() : '';
+    const stateFilter = stateSelect ? stateSelect.value : '';
+    const priceMin = priceMinInput && priceMinInput.value ? Number(priceMinInput.value) : null;
+    const priceMax = priceMaxInput && priceMaxInput.value ? Number(priceMaxInput.value) : null;
+    const furnishedFilter = furnishedSelect ? furnishedSelect.value : '';
+    const raceFilter = raceSelect ? raceSelect.value : '';
+
+    // 关键字：位置 / 类型 / 价格 / Code
+    const text = [
+        l.location || '',
+        l.type || '',
+        String(l.price || ''),
+        l.code || ''
+    ].join(' ').toLowerCase();
+    const matchKeyword = !keyword || text.includes(keyword);
+
+    // 州属
+    const matchState = !stateFilter || l.state === stateFilter;
+
+    // 价格区间
+    const price = Number(l.price || 0);
+    const matchPriceMin = priceMin === null || price >= priceMin;
+    const matchPriceMax = priceMax === null || price <= priceMax;
+
+    // 家私（模糊匹配 Fully / Partially / No）
+    const furnishedText = (l.furnished || '').toLowerCase();
+    const matchFurnished = !furnishedFilter || furnishedText.includes(furnishedFilter.toLowerCase());
+
+    // Race
+    const raceList = Array.isArray(l.race) ? l.race : [];
+    const matchRace = !raceFilter || raceList.includes(raceFilter);
+
+    return matchKeyword && matchState && matchPriceMin && matchPriceMax && matchFurnished && matchRace;
+}
         refreshListings();
         refreshMyListings();
         alert('删除成功！该房源已记录到"删除记录"里。');
@@ -1687,26 +1776,10 @@ async function permanentlyDeleteListing(id) {
 
 function refreshListings() {
     const container = document.getElementById('listingsContainer');
-    const keywordInput = document.getElementById('searchListings');
-    const stateSelect = document.getElementById('filterState');
-
-    const keyword = keywordInput ? keywordInput.value.trim().toLowerCase() : '';
-    const stateFilter = stateSelect ? stateSelect.value : '';
-
     container.innerHTML = '';
 
     listings
-        .filter(l => {
-            const text = [
-                l.location || '',
-                l.type || '',
-                String(l.price || ''),
-                l.code || ''
-            ].join(' ').toLowerCase();
-            const matchKeyword = !keyword || text.includes(keyword);
-            const matchState = !stateFilter || l.state === stateFilter;
-            return matchKeyword && matchState;
-        })
+        .filter(l => filterListingCommon(l))
         .forEach(listing => {
             container.appendChild(createListingCard(listing));
         });
@@ -1714,32 +1787,39 @@ function refreshListings() {
 
 function refreshMyListings() {
     const container = document.getElementById('myListingsContainer');
-    const keywordInput = document.getElementById('searchListings');
-    const stateSelect = document.getElementById('filterState');
-
-    const keyword = keywordInput ? keywordInput.value.trim().toLowerCase() : '';
-    const stateFilter = stateSelect ? stateSelect.value : '';
-
     container.innerHTML = '';
 
     listings
         .filter(l => l.user === currentUser)
-        .filter(l => {
-            const text = [
-                l.location || '',
-                l.type || '',
-                String(l.price || ''),
-                l.code || ''
-            ].join(' ').toLowerCase();
-            const matchKeyword = !keyword || text.includes(keyword);
-            const matchState = !stateFilter || l.state === stateFilter;
-            return matchKeyword && matchState;
-        })
+        .filter(l => filterListingCommon(l))
         .forEach(listing => {
             container.appendChild(createListingCard(listing));
         });
 }
 
+
+// 高级筛选按钮
+const applyBtn = document.getElementById('applyFilters');
+if (applyBtn) {
+    applyBtn.addEventListener('click', () => {
+        refreshListings();
+        refreshMyListings();
+    });
+}
+
+const resetBtn = document.getElementById('resetFilters');
+if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+        if (document.getElementById('searchListings')) document.getElementById('searchListings').value = '';
+        if (document.getElementById('filterState')) document.getElementById('filterState').value = '';
+        if (document.getElementById('priceMin')) document.getElementById('priceMin').value = '';
+        if (document.getElementById('priceMax')) document.getElementById('priceMax').value = '';
+        if (document.getElementById('filterFurnished')) document.getElementById('filterFurnished').value = '';
+        if (document.getElementById('filterRace')) document.getElementById('filterRace').value = '';
+        refreshListings();
+        refreshMyListings();
+    });
+}
 
 // 关闭模态框
 document.getElementById('closeModal').addEventListener('click', function() {
