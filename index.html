@@ -730,9 +730,9 @@
         <label>种族限制 Race</label>
         <div id="raceOptions" style="display:flex; flex-wrap:wrap; gap:10px; font-size:14px;">
             <label><input type="checkbox" name="race" value="All Race"> All Race</label>
-            <label><input type="checkbox" name="race" value="No Malay"> No Malay</label>
-            <label><input type="checkbox" name="race" value="No Indian"> No Indian</label>
-            <label><input type="checkbox" name="race" value="No Chinese"> No Chinese</label>
+            <label><input type="checkbox" name="race" value="Malay"> Malay</label>
+            <label><input type="checkbox" name="race" value="Indian"> Indian</label>
+            <label><input type="checkbox" name="race" value="Chinese"> Chinese</label>
         </div>
     </div>
 </div>
@@ -830,13 +830,14 @@
         <option value="No">Unfurnished</option>
     </select>
 
-    <select id="filterRace">
-        <option value="">Race 不限</option>
-        <option value="All Race">All Race</option>
-        <option value="No Malay">No Malay</option>
-        <option value="No Indian">No Indian</option>
-        <option value="No Chinese">No Chinese</option>
-    </select>
+<select id="filterRace">
+    <option value="">Race 不限</option>
+    <option value="All Race">All Race</option>        <!-- A -->
+    <option value="Malay">Only Malay</option>         <!-- B -->
+    <option value="Indian">Only Indian</option>       <!-- C -->
+    <option value="Chinese">Only Chinese</option>     <!-- D -->
+</select>
+
 
     <button class="btn btn-small btn-secondary" id="applyFilters">搜索</button>
     <button class="btn btn-small btn-secondary" id="resetFilters">重置</button>
@@ -1101,6 +1102,11 @@ document.getElementById('generateCaption').addEventListener('click', function(e)
     const area = document.getElementById('area').value;
     const bedrooms = document.getElementById('bedrooms').value;
     const bathrooms = document.getElementById('bathrooms').value;
+        // 收集勾选的 Race
+    const raceChecked = Array
+        .from(document.querySelectorAll('input[name="race"]:checked'))
+        .map(c => c.value);   // 例如 ["Malay","Chinese"]
+
 
     if (!type || !location || !price || !area) {
         alert('请先填写房产类型、位置、价格和面积');
@@ -1763,11 +1769,40 @@ function filterListingCommon(l) {
     const furnishedText = (l.furnished || '').toLowerCase();
     const matchFurnished = !furnishedFilter || furnishedText.includes(furnishedFilter.toLowerCase());
 
+    // ===== Race 逻辑 =====
     const raceList = Array.isArray(l.race) ? l.race : [];
-    const matchRace = !raceFilter || raceList.includes(raceFilter);
+
+    let matchRace = true;
+
+    if (!raceFilter) {
+        // “Race 不限” -> 不过滤
+        matchRace = true;
+    } else if (raceFilter === 'All Race') {
+        // A: All Race -> 只显示“完全不限”的房源
+        // 这里认为：全不限制 = race 是空数组 或 只包含 "All Race"
+        matchRace =
+            raceList.length === 0 ||
+            (raceList.length === 1 && raceList[0] === 'All Race');
+    } else if (raceFilter === 'Malay') {
+        // B: Only Malay -> 只包含 Malay，不能有其他种族
+        matchRace =
+            raceList.length === 1 &&
+            raceList[0] === 'Malay';
+    } else if (raceFilter === 'Indian') {
+        // C: Only Indian
+        matchRace =
+            raceList.length === 1 &&
+            raceList[0] === 'Indian';
+    } else if (raceFilter === 'Chinese') {
+        // D: Only Chinese
+        matchRace =
+            raceList.length === 1 &&
+            raceList[0] === 'Chinese';
+    }
 
     return matchKeyword && matchState && matchPriceMin && matchPriceMax && matchFurnished && matchRace;
 }
+
 
 
 function refreshListings() {
